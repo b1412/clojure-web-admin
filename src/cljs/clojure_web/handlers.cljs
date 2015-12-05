@@ -19,7 +19,7 @@
 
 
 
-(def entities [ "organization" "user" "role" "resource" "computer"])
+(def entities [ "organization" "user" "role" "resource" "computer" "brand"])
 
 (->> entities
      (mapcat (juxt reg-sub-entity reg-handler-entity))

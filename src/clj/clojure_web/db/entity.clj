@@ -73,6 +73,7 @@
 
 
 (defent computer
+  (k/belongs-to brand {:fk :brand_id})
   (k/belongs-to user {:fk :creator_id}))
 
 (defent brand
@@ -152,9 +153,10 @@
                             (into {}))))
           (map (fn [m] (if (= (name (:column-name m)) (get-pk table))
                          (assoc m :primary-key 1)
-                         m))))]
-     (swap! metadata-mem assoc table (apply list columns))
-     (@metadata-mem table))))
+                         m))))
+         results (apply list columns)]
+     (swap! metadata-mem assoc table results)
+     results)))
 
 (defn  get-col-metadata [entity col]
   (->> (get-all-columns-with-comment entity)

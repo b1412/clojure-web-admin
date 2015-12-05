@@ -164,9 +164,19 @@ In the showcase,take 'computer' table as an example.
 (defent computer)
 ```
 
-* insert-res-for-entity
+* Init Db
 
-* insert-res-to-role
+```clojure
+clojure-web.core> (use 'clojure-web.db.kit)
+clojure-web.core> (use 'clojure-web.db.entity)
+clojure-web.core> (insert-res-for-entity brand)
+;;;Create resources for entity 'brand'
+clojure-web.core> (insert-res-to-role brand 1)
+;;; assign resources to Role 'admin'. 1 is the ID of Role'admin'
+
+clojure-web.core> (reset! metadata-mem {})
+;;; once you change your schema ,reset the metadata catch in memory.
+```
 
 * Create back-end
 
@@ -181,7 +191,7 @@ create a router for the new table
 (defcrud-routes computer-routes computer)
 ```
 
-add the new router to handler
+add the new router to handler in handle.clj
 
 ```clojure
 (defapi app-routes
@@ -209,12 +219,12 @@ creater a new datagrid.
 (def computer-panel (create-bs-table "computer"))
 ```
 
-add the new table to menu
+add the new table to menu in core.cljs
 
 ```clojure
 (def panels {"computers" computer-panel
 ;;; omit other panels
-            }
+}
 ```
 
 ## Permission System

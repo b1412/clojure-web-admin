@@ -136,6 +136,8 @@
         lookup-table (:lookup-table metadata)
         lookup-table-alise (:lookup-table-alise metadata)
         lookup-label (:lookup-label metadata)]
+    (prn row)
+    (prn lookup-label)
     ((keyword (str (or lookup-table-alise lookup-table) "." lookup-label)) row)))
 
 (defmethod td-value "enum" [metadata-item row]
