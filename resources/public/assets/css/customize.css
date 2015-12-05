@@ -1,0 +1,110 @@
+.modal-header {
+  min-height: 16.42857143px;
+  padding: 15px;
+  border-bottom: 1px solid #e5e5e5;
+  background-color: #428bca;
+}
+.modal-title {
+    color: #fff;
+    display: inline-block;
+}
+
+
+.form-group .warning {
+    font-weight: normal;
+    background: #ec971f;
+    color: #DDD;
+    border-radius: 2px;
+    padding: 1px 4px;
+    margin-top: 1px;
+}
+
+
+
+.form-group .error {
+    font-weight: normal;
+    ;background: #d9534f;
+    background: #A94442;
+    color: #DDD;
+    border-radius: 2px;
+    padding: 1px 4px;
+    margin-top: 1px;
+}
+
+.bootstrap-table {
+   width: 1000px
+}
+
+
+.nav-tabs {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+.nav-tabs > li > a {
+    border-radius: 0;
+    box-shadow: inset 0 -8px 7px -9px rgba(0,0,0,.4),-2px -2px 5px -2px rgba(0,0,0,.4);
+}
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover {
+
+    box-shadow: inset 0 0 0 0 rgba(0,0,0,.4),-2px -3px 5px -2px rgba(0,0,0,.4);
+}
+
+.tab-pane {
+    box-shadow: 0 0 4px rgba(0,0,0,.4);
+    border-radius: 0;
+}
+
+.navbar {
+  position: relative;
+  min-height: 50px;
+
+  margin-bottom: 0px;
+  border: 1px solid transparent;
+}
+.show-grid1 [class^=col-]{padding-top:10px;
+                         padding-bottom:10px;
+                         background-color:#eee;
+                         background-color:rgba(86,61,124,.15);
+                         border:1px solid #ddd;
+                         border:1px solid rgba(86,61,124,.2)}
+.show-grid [class^=col-] {
+                         padding-bottom:10px;
+
+}
+.search-box{
+    background-color: #ebf0f5;
+    margin-bottom:1px;
+    border-style:solid;
+     border-color:#ebf0f5;
+    border-width:0 0 1px 0;
+}
+.pageHeader {
+    display:block;
+    overflow:auto;
+    margin-bottom:1px;
+    padding:5px;
+    border-style:solid;
+    border-width:0 0 1px 0;
+    position:relative;
+}
+
+.fixed-table-toolbar {
+    position: relative;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    line-height: 34px;
+}
+#chartContainer{
+    width: 898px;
+    margin-left: -15px
+}
+.file-drop-zone {
+    height: 40%;
+}
+
+.progress {
+    width: 30%;
+    margin: 20% auto;
+}
