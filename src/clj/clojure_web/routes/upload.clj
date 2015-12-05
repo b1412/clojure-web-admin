@@ -1,5 +1,5 @@
 (ns clojure-web.routes.upload
-  (:require [clojure-web.common.routes-helper :refer [create-entity]]
+  (:require [clojure-web.common.crud :refer [create-entity]]
             [clojure-web.db.entity :refer [upload]]
             [clojure-web.render :as render :refer [*app-context*]]
             [clojure.java.io :as io]

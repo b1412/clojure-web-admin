@@ -79,7 +79,7 @@
                 options)]
      (fn [{:keys [session uri request-method] :as req}]
        (if-not (or (re-matches (re-pattern anon) uri)
-                   #{login-uri logout-uri default-landing-uri} uri)
+                   (#{login-uri logout-uri default-landing-uri} uri))
          (case (authorized? req index-uri)
            ::not-login (redirect default-landing-uri)
            ::authorized (let [req (assoc-in req

@@ -1,4 +1,4 @@
-(ns clojure-web.common.routes-helper
+(ns clojure-web.common.crud
   (:require [bouncer.core :as b]
             [clj-time
              [format :as f]
@@ -93,6 +93,7 @@
 (defn data-level-cond [scope curr-user]
   (case scope
     "system" {}
+    "orgs" {}
     "org"  {:user.organization-id (:organization.id curr-user)}
     "user" {:creator-id (:id curr-user)}
     (throw+ {:type ex/unknown :message (str "unknown scope: " scope )})))
@@ -188,13 +189,6 @@
                                 (pmap (partial value-out-adapter (:name entity)))
                                 (into {}))))]
     {:rows result :total cnt}))
-
-(comment
-  (result (->> result
-                    (map #(->> %
-                               (map (partial value-out-adapter (:name entity)))
-                               (into {}))))))
-
 
 (defmulti value-in-adapter
   (fn [entity [k v]]
