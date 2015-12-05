@@ -34,15 +34,10 @@
                                                   (filter (fn [[db-r-id db-s]]
                                                             (= (Integer/parseInt r-id) db-r-id)))
                                                   (first))]
-                                    (log/info curr)
                                     (and (db-ids (Integer/parseInt r-id))
                                          (not= s (second curr)) )))))
         new-data (->> param
                       (remove (fn [[r-id s]] (db-ids (Integer/parseInt r-id)))))]
-    (log/info "del" (vec del-data))
-    (log/info "exist" (vec exist-data))
-    (log/info "new" (vec new-data))
-
     (->> del-data
          (map (fn [[r-id s]] (-> (k/delete* role-resource)
                                  (k/where {:role_id id :resource_id r-id :scope s})

@@ -43,7 +43,7 @@
    [:div.col-md-2]
    [:div.col-md-5
     [:div.alert.alert-danger
-     {:field :alert :id (keyword (str "errors." id))}]]])
+     {:field :alert :id (keyword (str "errors." (name id)))}]]])
 
 
 
@@ -162,10 +162,19 @@
 (defmethod  re-form-input-render :default [metadata-item form-data]
   (let [id (:column-name metadata-item)]
     [:div
-     (input (th-value metadata-item) :text (keyword id))
+     (row (th-value metadata-item) [:input.form-control {:field :text :id (keyword id)}])
      (alert-info id)]))
 
-
+(defmethod  re-form-input-render "decimal" [metadata-item form-data]
+  (let [id (keyword (:column-name metadata-item))
+        decimal-digits (:decimal-digits metadata-item)]
+    [:div
+     (row (th-value metadata-item)
+          [:input.form-control
+           {:field :numeric
+            :id id
+            :fmt (str "%." decimal-digits "f" )}])
+     (alert-info id)]))
 
 
 (defmethod  re-form-input-render "attachment" [metadata-item form-data]
@@ -213,21 +222,12 @@
      (row (th-value metadata-item) [:input.form-control {:field :numeric :id id}])
      (alert-info id)]))
 
-(defmethod  re-form-input-render "decimal" [metadata-item form-data]
-  (let [id (keyword (:column-name metadata-item))
-        decimal-digits (:decimal-digits metadata-item)]
-    [:div
-     (row (th-value metadata-item)
-          [:input.form-control
-           {:field :numeric
-            :id id
-            :fmt (str "%." decimal-digits "f" )}])
-     (alert-info id)]))
+
 
 (defmethod  re-form-input-render "textarea" [metadata-item form-data]
   (let [id (:column-name metadata-item)]
     [:div
-     (input (th-value metadata-item) :textarea (keyword id))
+     (row (th-value metadata-item) [:textarea.form-control {:field :textarea :id (keyword id)}])
      (alert-info id)]))
 
 (defmethod  re-form-input-render "date" [metadata-item form-data]
@@ -267,6 +267,7 @@
   (let [id (keyword (:column-name metadata-item))
         data (->> (:enum-map metadata-item)
                   (map (fn [[k v]] [(name k)  v])))]
+    (prn id)
     [:div
      (row (th-value metadata-item)
           [:select.form-control {:field :list :id id}
@@ -320,7 +321,7 @@
       [:div
        (apply (partial show-when [bind-fields form-template form-data])
               @datas)
-;              [:label (str @form-data)]
+;;              [:label (str @form-data)]
        [ButtonToolbar
         [Button
          {:bs-style "primary"
@@ -331,8 +332,7 @@
               (if errs
                 (->> errs
                      (map (fn [[k v]]
-                            (swap! form-data assoc-in [:errors k]
-                                   (first v))))
+                            (swap! form-data assoc-in [:errors k] (first v))))
                      (doall))
                 (process-ok form-data))))}
          "Save"]

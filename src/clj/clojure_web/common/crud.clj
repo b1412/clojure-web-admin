@@ -203,7 +203,7 @@
 
 
 (defn create-entity [entity params]
-  (debug  params)
+  (debug  "create " (:name entity) "  " params)
   (let [metadatas (e/get-all-columns-with-comment (:name entity))
         validators (get-validators metadatas)
         result (apply (partial b/validate params) validators)
@@ -316,7 +316,8 @@
       (header "content-disposition" (str "attachment; filename=" (:table entity) "-template.xlsx"))))
 
 
-(defn process-excel [entity params]
+(defn extract-from-excel [entity params]
+  (debug params)
   (let [columns (->> (e/get-all-columns-with-comment (:table entity))
                      (filter (partial has-feature? :importable))
                      (mapv :column-name))
@@ -332,9 +333,9 @@
                         (select-columns
                          columns)
                         (rest))]
-      (-> (k/insert* entity)
-          (k/values entities)
-          (k/insert)))))
+      (->> entities
+           (map #(create-entity entity (merge % (select-keys params [:s-scope :current-user]))))
+           (doall)))))
 
 
 
@@ -360,7 +361,7 @@
 
 
                  (POST* "/excel" {params# :params}
-                        (render/json (process-excel ~entity# params#)))
+                        (render/json (extract-from-excel ~entity# params#)))
 
                  (POST* "/"  {params# :params} (render/json (create-entity
                                            ~entity#

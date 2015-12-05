@@ -1,5 +1,5 @@
 (defproject clojure-web "0.1.0-SNAPSHOT"
-
+ 
   :description "A metadata-driven clojure web admin app"
   :url "https://github.com/b1412/clojure-web-admin"
   :dependencies [[org.clojure/clojure "1.7.0"]

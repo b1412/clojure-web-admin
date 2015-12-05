@@ -134,12 +134,35 @@ Column-name in details
 
 
 ## How to add new entities
+So far adding new entities cause  a bit of pain, be patient, better tool is coming soon!
+
+Follow the steps,you can get a new table with awesome features provided by the project both in font-end & back-end,then you can bulit you own business logic based on them.
 
 * Create a new table in db.
 
-* Design the schema  and add extra schema in comments
+In the showcase,take 'computer' table as an example.
+
+* Design the schema  and add extra schema in comments.
+```mysql
+ CREATE TABLE `computer` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL COMMENT 'importable=1\nexportable=1\nchart-label=1',
+  `price` decimal(12,2) NOT NULL COMMENT 'importable=1\nexportable=1\nchart-value=1',
+  `image` int(11) DEFAULT NULL COMMENT 'type-name=image\nhidden-in-grid=1',
+  `status` varchar(12) DEFAULT NULL COMMENT 'type-name=enum\nenum-group=computer',
+  `remark` varchar(1024) DEFAULT NULL COMMENT 'type-name=textarea\nhidden-in-grid=1\nimportable=1\nexportable=1',
+  `creator_id` int(11) DEFAULT NULL COMMENT 'reserved=1\ntype-name=select\nlookup-table=user\nlookup-label=username',
+  `created_at` datetime DEFAULT NULL COMMENT 'reserved=1',
+  `updated_at` datetime DEFAULT NULL COMMENT 'reserved=1',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8
+```
 
 * Declare the entity in entity.clj
+
+```clojure
+(defent computer)
+```
 
 * insert-res-for-entity
 

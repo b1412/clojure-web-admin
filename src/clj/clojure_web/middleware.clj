@@ -96,7 +96,6 @@
                    (filter (fn [{:keys [method]}] (= method (-> request-method (name) (str/upper-case)))))
                    (filter (fn [e] (re-matches  (re-pattern (:uri e)) uri)))
                    (first))]
-    (log/info "auth " auth)
     (:scope auth)))
 
 (defn data-level-auth
@@ -108,7 +107,6 @@
           scope (get-data-level curr-user request-method uri)
           req (assoc-in req [:params :s-scope] scope)
           req (assoc-in req [:params :current-user] curr-user)]
-      (log/info "scope" scope)
       (handler req))))
 
 (defn wrap-base [handler]

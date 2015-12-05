@@ -11,7 +11,7 @@
 ;; -- Middleware --------------------------------------------------------------
 
 
-(def middlewares [trim-v debug])        ;; remove event id from event vec
+(def middlewares [trim-v])        ;; remove event id from event vec
 
 
 
