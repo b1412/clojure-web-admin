@@ -3,6 +3,7 @@
             [clojure-web.constants :refer [meta-columns]]
             [clojure.java.jdbc :as jdbc]
             [clojure.core.cache :as cache]
+            [environ.core :refer [env]]
             [taoensso.timbre :as log]
             [korma
              [core :as k]
@@ -72,6 +73,10 @@
 
 
 (defent computer
+  (k/belongs-to brand {:fk :brand_id})
+  (k/belongs-to user {:fk :creator_id}))
+
+(defent brand
   (k/belongs-to user {:fk :creator_id}))
 
 (defn get-children [root coll]
@@ -107,11 +112,11 @@
   (try (Integer/parseInt s)
        (catch Exception e s)))
 
-(def men  (atom {}))
+(def metadata-mem  (atom {}))
 
 (defn get-all-columns-with-comment [table]
   (or
-   (@men table)
+   (@metadata-mem table)
    (let [columns
          (->>
           (get-all-columns table)
@@ -138,10 +143,7 @@
                                 (str/split-lines)
                                 (map (fn [args] (str/split args #"=")))
                                 (map (fn [[k v]] {(keyword k)
-                                                  (-> v
-                                                      (parse-int)
-                                        ;                                               (#(let [ke (keyword %)] (if (nil? ke) % ke)))
-                                                      )}))
+                                                  (-> v (parse-int))}))
                                 (into {})))))))
 
           (map (fn [m] (->> m
@@ -151,9 +153,10 @@
                             (into {}))))
           (map (fn [m] (if (= (name (:column-name m)) (get-pk table))
                          (assoc m :primary-key 1)
-                         m))))]
-     (swap! men assoc table (apply list columns))
-     (@men table))))
+                         m))))
+         results (apply list columns)]
+     (swap! metadata-mem assoc table results)
+     results)))
 
 (defn  get-col-metadata [entity col]
   (->> (get-all-columns-with-comment entity)

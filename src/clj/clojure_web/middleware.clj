@@ -79,7 +79,7 @@
                 options)]
      (fn [{:keys [session uri request-method] :as req}]
        (if-not (or (re-matches (re-pattern anon) uri)
-                   #{login-uri logout-uri default-landing-uri} uri)
+                   (#{login-uri logout-uri default-landing-uri} uri))
          (case (authorized? req index-uri)
            ::not-login (redirect default-landing-uri)
            ::authorized (let [req (assoc-in req
@@ -96,7 +96,6 @@
                    (filter (fn [{:keys [method]}] (= method (-> request-method (name) (str/upper-case)))))
                    (filter (fn [e] (re-matches  (re-pattern (:uri e)) uri)))
                    (first))]
-    (log/info "auth " auth)
     (:scope auth)))
 
 (defn data-level-auth
@@ -108,7 +107,6 @@
           scope (get-data-level curr-user request-method uri)
           req (assoc-in req [:params :s-scope] scope)
           req (assoc-in req [:params :current-user] curr-user)]
-      (log/info "scope" scope)
       (handler req))))
 
 (defn wrap-base [handler]

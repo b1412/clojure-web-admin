@@ -1,9 +1,9 @@
 (ns clojure-web.routes.role
-  (:require [clojure.set :as set]
-            [clojure-web.common.routes-helper :refer [defcrud-routes query-entity]]
+  (:require [clojure-web.common.crud :refer [defcrud-routes query-entity]]
             [clojure-web.db.entity :refer [role role-resource]]
             [clojure-web.render :as render]
-            [compojure.api.sweet :refer [GET* context* PUT*]]
+            [clojure.set :as set]
+            [compojure.api.sweet :refer [context* GET* PUT*]]
             [korma.core :as k]
             [taoensso.timbre :as log]))
 
@@ -34,19 +34,14 @@
                                                   (filter (fn [[db-r-id db-s]]
                                                             (= (Integer/parseInt r-id) db-r-id)))
                                                   (first))]
-                                    (log/info curr)
                                     (and (db-ids (Integer/parseInt r-id))
                                          (not= s (second curr)) )))))
         new-data (->> param
                       (remove (fn [[r-id s]] (db-ids (Integer/parseInt r-id)))))]
-    (log/info "del" (vec del-data))
-    (log/info "exist" (vec exist-data))
-    (log/info "new" (vec new-data))
-
     (->> del-data
          (map (fn [[r-id s]] (-> (k/delete* role-resource)
-                         (k/where {:role_id id :resource_id r-id :scope s})
-                         (k/delete))))
+                                 (k/where {:role_id id :resource_id r-id :scope s})
+                                 (k/delete))))
          (doall))
 
     (->> new-data

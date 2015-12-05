@@ -16,6 +16,7 @@
             [clojure-web.handlers]
             [clojure-web.role :refer [role-panel]]
             [clojure-web.user :refer [user-panel]]
+            [clojure-web.brand :refer [brand-panel]]
             [clojure-web.computer :refer [computer-panel]]
             [clojure-web.resource :refer [resource-panel]]
             [clojure-web.organization :refer [organization-panel]]
@@ -30,7 +31,8 @@
   (:import [goog History]))
 
 
-(def panels {"computers" computer-panel
+(def panels {"brands" brand-panel
+             "computers" computer-panel
              "users" user-panel
              "roles" role-panel
              "resources" resource-panel
