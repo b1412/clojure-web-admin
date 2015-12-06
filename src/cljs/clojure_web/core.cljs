@@ -18,6 +18,7 @@
             [clojure-web.user :refer [user-panel]]
             [clojure-web.brand :refer [brand-panel]]
             [clojure-web.computer :refer [computer-panel]]
+            [clojure-web.brand :refer [brand-panel]]
             [clojure-web.resource :refer [resource-panel]]
             [clojure-web.organization :refer [organization-panel]]
             [clojure-web.components.react-bootstrap

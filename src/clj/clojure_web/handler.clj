@@ -70,6 +70,7 @@
   (swagger-docs {:info {:title "Clojure Web API"}})
   brand-routes
   computer-routes
+  brand-routes
   home-routes
   upload-routes
   organization-routes
