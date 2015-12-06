@@ -72,7 +72,7 @@
      {:output-to "resources/public/js/app.js"
       :externs ["react/externs/react.js"]
       :pretty-print true}}}}
-  :global-vars {*warn-on-reflection* true}
+  :global-vars {*warn-on-reflection* false}
   :profiles
   {:uberjar {:omit-source true
              :env {:production true}
