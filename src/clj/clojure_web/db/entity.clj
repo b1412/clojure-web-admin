@@ -71,12 +71,14 @@
 
 (defent upload)
 
-
-(defent computer
-  (k/belongs-to user {:fk :creator_id}))
-
 (defent brand
   (k/belongs-to user {:fk :creator_id}))
+
+(defent computer
+  (k/belongs-to brand)
+  (k/belongs-to user {:fk :creator_id}))
+
+
 
 (defn get-children [root coll]
   (filter #(= (:parent_id %) (:id root)) coll))

@@ -4,6 +4,7 @@
              [middleware :as middleware]
              [render :as render]]
             [clojure-web.routes
+             [brand :refer [brand-routes]]
              [computer :refer [computer-routes]]
              [home :refer [home-routes]]
              [organization :refer [organization-routes]]
@@ -68,6 +69,7 @@
   (swagger-ui  "/api-ui")
   (swagger-docs {:info {:title "Clojure Web API"}})
   computer-routes
+  brand-routes
   home-routes
   upload-routes
   organization-routes
