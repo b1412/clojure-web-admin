@@ -24,7 +24,6 @@
                                                             ModalTitle]]
 
             [bouncer.core :as b]
-            [bouncer.validators :as vv]
             [clojure-web.validate :refer [get-validators]]
             [inflections.core :refer  [plural titleize]]))
 
@@ -162,7 +161,9 @@
 (defmethod  re-form-input-render :default [metadata-item form-data]
   (let [id (:column-name metadata-item)]
     [:div
-     (row (th-value metadata-item) [:input.form-control {:field :text :id (keyword id)}])
+     (row (th-value metadata-item)
+          [:input.form-control {:field :text
+                                :id (keyword id)}])
      (alert-info id)]))
 
 (defmethod  re-form-input-render "decimal" [metadata-item form-data]
@@ -254,7 +255,7 @@
         label (label-name (:column-name metadata-item))
         lookup-table (:lookup-table metadata-item)
         lookup-label (keyword (:lookup-label metadata-item))
-        event (keyword (str lookup-table "s"))
+        event (keyword (plural lookup-table ))
         data  (subscribe [event])]
     [:div
      (row (th-value metadata-item)

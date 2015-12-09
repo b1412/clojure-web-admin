@@ -1,14 +1,15 @@
 
 * Description
 
-Clojure web admin is a clojure(script)-based, metadata-driven web admin system providing some generic features in web admin system. 
+Clojure web admin (CWA) is a clojure(script)-based, metadata-driven web admin system providing some generic features in web admin system. 
 
 The core features are as follows:
 
- + CURD with data-Level permissions based on korma
- + Menu tree & toolbars with button-level permissions based on reagent/re-frame
- + High-level abstractions in field type based on reagent-forms (e.g. image, attachment, enum, select, etc.) 
- + Font-end & Back-end validation based on bouncer.
+ + RESTful api&doc based on [[https://github.com/metosin/compojure-api][Computer-api&swagger]]  
+ + CRUD with data-level permissions based on [[https://github.com/korma/Korma][korma]] 
+ + Menu tree&toolbar with button-level permissions based on [[https://github.com/reagent-project/reagent][reagent]] & [[https://github.com/Day8/re-frame][re-frame]]
+ + High-level abstract field types based on [[https://github.com/reagent-project/reagent-forms][reagent-forms]] (e.g. image, attachment, enum, select, etc.) 
+ + Font-end&back-end validation based on [[https://github.com/leonardoborges/bouncer][bouncer]]
 
 
 Other features:
@@ -16,10 +17,10 @@ Other features:
  + Login/Logout
  + Optimistic lock for updating data
  + Default value showing in forms
- + Export as excel file/Import from excel file
- + Bar chart for datagrid based on CanvasJs
+ + Export as excel file & import from excel file
+ + Bar chart for datagrid based on [[http://canvasjs.com/  ][CanvasJs]]
 
-More features are coming up..
+ More features are coming up..
 
 * Quick Start
 
@@ -62,7 +63,7 @@ Let`s get start!
       lein run
     #+END_SRC
   
-  NOTE:  to get better experience, use REPL to play!
+  NOTE:  Use REPL to get better development experience.
 
 + Visit http://localhost:3000 and log in as admin 
    
@@ -70,15 +71,14 @@ Let`s get start!
     
     password: admin
 
-+ Go [[https://github.com/b1412/clojure-web-admin/wiki/Demo-in-details][demo in details]] to see snapshots of core features in demo moduals before you play it.
-
++ Go [[https://github.com/b1412/clojure-web-admin/wiki/Demo-in-details][demo in details]] to see snapshots and descriptions of core features in demo moduals before you play it.
 
 * More details
 
   Go [[https://github.com/b1412/clojure-web-admin/wiki/Home][wiki]] to go deeper into the project. 
 
-# License
+* License
 
-Copyright © 2015 Leon Zhou
+Copyright © 2015 Leon Zhou (http://kidzhou.me)
 
 Distributed under the Eclipse Public License, the same as Clojure.

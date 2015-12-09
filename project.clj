@@ -51,6 +51,7 @@
                  [cljs-http "0.1.37"]
                  [hiccup-bridge "1.0.1"]
                  [crypto-password "0.1.3"]
+                 [com.alibaba/druid "1.0.16"]
                  [mysql/mysql-connector-java "5.1.6"]]
   :source-paths ["src/clj" "src/cljc"]
   :min-lein-version "2.0.0"

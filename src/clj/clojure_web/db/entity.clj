@@ -9,13 +9,76 @@
              [core :as k]
              [db :refer [defdb mysql]]]
             [superstring.core :as str])
-  (:refer-clojure :exclude [group]))
+  (:refer-clojure :exclude [group])
+  (:import [com.alibaba.druid.filter Filter]
+           [com.alibaba.druid.pool DruidDataSource]))
 
 (def mysql-db {:subprotocol "mysql"
                :subname "//127.0.0.1:3306/clojure_web"
                :user "root"
+               :driver-class "com.mysql.jdbc.Driver"
                :password "root"
-               :remarks-reporting true})
+               :init-pool-size 4
+               :max-pool-size 20})
+
+(defn pooled-datasource [db-spec]
+  (let [{:keys [classname subprotocol subname user password driver-class
+                initial-size min-idle max-active max-wait
+                time-between-connect-error-millis
+                time-between-eviction-runs-millis
+                min-evictable-idle-time-millis
+                validation-query
+                test-while-idle
+                test-on-borrow
+                test-on-return
+                remove-abandoned
+                remove-abandoned-timeout-millis
+                log-abandoned
+                 max-pool-prepared-statement-per-connection-size]}
+        (merge {:initial-size 10
+                :min-idle 10
+                :max-active 100
+                :max-wait DruidDataSource/DEFAULT_MAX_WAIT
+                :time-between-evictionRunsMillis
+                DruidDataSource/DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS
+                :minEvictableIdleTimeMillis
+                DruidDataSource/DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS
+                :time-between-connectErrorMillis
+                DruidDataSource/DEFAULT_TIME_BETWEEN_CONNECT_ERROR_MILLIS
+                :validation-query  "select 1"
+                :test-while-idle   true
+                :test-on-borrow   false
+                :test-on-return  false
+                :remove-abandoned  false
+                :remove-abandoned-timeout-millis  (* 300  1000)
+                :log-abandoned  false
+                :max-pool-prepared-statement-perConnectionSize -1}
+               db-spec)
+        cpds (doto (DruidDataSource.)
+               (.setUrl (str "jdbc:" subprotocol ":" subname))
+               (.setUsername user)
+               (.setPassword password)
+               (.setDriverClassName driver-class)
+               (.setInitialSize initial-size)
+               (.setMinIdle min-idle)
+               (.setMaxActive　max-active)
+               (.setMaxWait max-wait)
+
+;;;               (.setTimeBetweenConnectErrorMillis time-between-connect-error-millis)
+;;;               (.setTimeBetweenEvictionRunsMillis time-between-eviction-runs-millis)
+;;;               (.setMinEvictableIdleTimeMillis min-evictable-idle-time-millis)
+;;;               (.setValidationQuery validation-query)
+;;;               (.setTestWhileIdle　test-while-idle)
+;;;               (.setTestOnBorrow test-on-borrow)
+;;;               (.setTestOnReturn test-on-return)
+;;;               (.setRemoveAbandoned remove-abandoned)
+;;;               (.setRemoveAbandonedTimeoutMillis remove-abandoned-timeout-millis)
+;;;               (.setLogAbandoned log-abandoned)
+;;;               (.setMaxPoolPreparedStatementPerConnectionSize max-pool-prepared-statement-per-connection-size)
+               )]
+               {:datasource cpds}))
+
+(def pooled-mysql-db (pooled-datasource  mysql-db))
 
 (defdb db (mysql {:db "clojure_web"
                   :user "root"

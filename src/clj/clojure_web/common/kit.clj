@@ -34,7 +34,7 @@
 
 (defn column-adapter [m]
   (->> m
-       (map (fn [[k v]] {(underscore->dash k) v}))
+       (map (fn [[k v]] [(underscore->dash k) v]))
        (into {})))
 
 (defn column-adapter2 [m]
