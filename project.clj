@@ -42,6 +42,7 @@
                  [re-frame "0.4.1"]
                  [re-com "0.7.0"]
                  [reagent-forms "0.5.13"]
+                 [garden "1.3.0"]
                  [secretary "1.2.3"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [metosin/compojure-api "0.24.0"]
@@ -60,6 +61,7 @@
   :main clojure-web.core
   :plugins [[lein-environ "1.0.1"]
             [hiccup-bridge "1.0.1"]
+            [lein-garden "0.2.6"]
             [lein-cljsbuild "1.1.0"]]
   :cljfmt {}
   :clean-targets ^{:protect false}
@@ -94,11 +96,18 @@
                                  [lein-figwheel "0.4.1"]
                                  [midje "1.6.3"]]
                   :plugins [[lein-figwheel "0.4.1"]]
-                   :cljsbuild
-                   {:builds
-                    {:app
-                     {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
-                  
+                  :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
+                  :garden {:builds [{:id "screen"
+                                     :source-paths ["src/clj"]
+                                     :stylesheet clojure-web.css/screen
+                                     :compiler {:output-to "resources/public/assets/css/screen.css"
+                                                :pretty-print? true}}
+                                    {:id "screen2"
+                                     :source-paths ["src/clj"]
+                                     :stylesheet clojure-web.css/screen2
+                                     :compiler {:output-to "resources/public/assets/css/screen2.css"
+                                                :pretty-print? true}}]}
+
                   :figwheel
                   {:http-server-root "public"
                    :server-port 3449

@@ -5,7 +5,7 @@
              [re-frame.core :refer [dispatch subscribe]]
              [clojure-web.subs ]
              [clojure-web.handlers]
-             [clojure-web.components.bs-table :refer [create-bs-table]]
+             [clojure-web.components.entity-bs-table :refer [create-bs-table]]
              [clojure-web.components.react-bootstrap :refer [Button ButtonToolbar
                                                              Glyphicon Table
                                                              Tabs Tab]]

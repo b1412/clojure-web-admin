@@ -92,10 +92,7 @@
 (defn on-select-tab [tab]
   (.setToken history (menu-route {:tab tab})))
 
-(defn ->js [var-name]
-      (-> var-name
-          (str/replace #"/" ".")
-          (str/replace #"-" "_")))
+
 
 (defn right-side-tabs
   [tabs selected-tab-id ]

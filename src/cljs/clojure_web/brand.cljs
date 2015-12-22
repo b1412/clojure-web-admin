@@ -1,5 +1,5 @@
 (ns clojure-web.brand
-  (:require [clojure-web.components.bs-table
+  (:require [clojure-web.components.entity-bs-table
              :refer
              [create-bs-table]]))
 

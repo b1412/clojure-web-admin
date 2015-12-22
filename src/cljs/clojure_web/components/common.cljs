@@ -118,6 +118,10 @@
        (#(subs % 0 (str/last-index-of % "id")))
        (label-name)))
 
+(defmethod th-value "lookup" [metadata]
+  (->> (:column-name metadata)
+       (#(subs % 0 (str/last-index-of % "id")))
+       (label-name)))
 
 (defn get-remote [args]
   (js->clj
@@ -156,8 +160,7 @@
 
 (defn show-on-click
   "Show second component when first component clicked "
-  [& {:keys [trigger body title
-             on-hide]
+  [& {:keys [trigger body title on-hide]
       :or {title "Information" }}]
   (let [show? (reagent/atom false)]
     (fn []
@@ -192,6 +195,69 @@
 (defn has-permission [permissions permission com]
   (let [show? (seq (filter #(= permission (:key %)) permissions))]
     (when show? com)))
+
+(defn select-to-do
+  [& {:keys [trigger
+             select-fn
+             alert-title alert-message
+             confirm-title confirm-message
+             confirm-fn]
+      :or {alert-title "Notification" alert-message "Please select one record!"
+           confirm-title "Notification" confirm-message "Are you sure?"}}]
+  (let [selected-show? (reagent/atom false)
+        no-selected-show? (reagent/atom false)
+        args (atom {})]
+    (fn []
+      [:div
+       (update trigger 1 assoc :on-click
+               (fn [e]
+                 (if-let [row (select-fn)]
+                   (do (reset! selected-show? true)
+                       (reset! args row)
+                       (.preventDefault e) )
+                   (do
+                     (reset! no-selected-show? true)
+                     (.preventDefault e)))))
+       [Modal
+        {:show @selected-show?
+         :on-hide (fn [e]
+                    (reset! selected-show? false)
+                    (.preventDefault e) )
+         :bs-size "large"
+         :aria-labelledby "contained-modal-title-lg"}
+        [ModalHeader {:close-button true} [ModalTitle confirm-title]]
+        [ModalBody  confirm-message]
+        [ModalFooter
+         [Button
+          {:on-click (fn [e]
+                       (reset! selected-show? false)
+                       (.preventDefault e) )}
+          "No"]
+         [Button
+          {:bs-style "primary"
+           :on-click (fn [e]
+                       (confirm-fn @args)
+                       (reset! selected-show? false)
+                       (.preventDefault e) )}
+          "Yes"]]]
+
+       [Modal
+        {:show @no-selected-show?
+         :on-hide (fn [e]
+                    (reset! no-selected-show? false)
+                    (.preventDefault e))
+         :bs-size "large"
+         :aria-labelledby "contained-modal-title-lg"}
+        [ModalHeader {:close-button true} [ModalTitle alert-title]]
+        [ModalBody  alert-message]
+        [ModalFooter
+         [Button
+          {:on-click (fn [e]
+                       (reset! no-selected-show? false)
+                       (.preventDefault e))}
+          "Ok"]]]])))
+
+
 
 (defn select-to-show
   [& {:keys [trigger body select-fn

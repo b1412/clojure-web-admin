@@ -12,6 +12,7 @@
             [clojure-web.components.common :refer [th-value label-name render-in-conds
                                                    show-on-click show-when close
                                                    FaIcon]]
+            [clojure-web.components.bs-table :refer [lookup-entity-bs-table]]
             [clojure-web.uploads :refer [bs-file-upload]]
             [clojure-web.components.react-bootstrap :refer [Input
                                                             Button
@@ -102,7 +103,6 @@
 
 (defmethod init-field :image
   [[_ {:keys [field id] :as attrs} :as component] {:keys [doc] :as opts}]
-  (prn  ((keyword (str (name id) ".path")) @doc))
   (let [upload-path (reagent/atom
                      ((keyword (str (name id) ".path")) @doc))]
     (fn []
@@ -123,20 +123,20 @@
             value)
    :on-change #(save! id (->> % (value-of) (format-type field)))})
 
+
 (defmethod init-field :attachment
   [[_ {:keys [field id] :as attrs} :as component] {:keys [doc] :as opts}]
-  (prn  ((keyword (str (name id) ".path")) @doc))
   (let [upload-path (reagent/atom
                      ((keyword (str (name id) ".path")) @doc))]
     (fn []
-      (prn @upload-path)
       [:div.form-group
        (when (not-empty @upload-path)
-           [:div [:input.form-control {:read-only true :type :text :value  @upload-path}]
-            [Button {:bs-style "info"
-                     :on-click (fn [e]
-                                 (aset js/window "location" @upload-path))}
-             [FaIcon "download"]]])
+         [:div
+          [:input.form-control {:read-only true :type :text :value  @upload-path}]
+          [Button {:bs-style "info"
+                   :on-click (fn [e]
+                               (aset js/window "location" @upload-path))}
+           [FaIcon "download"]]])
        [show-on-click
         :trigger
         [Button {:bs-style "primary"}
@@ -152,6 +152,30 @@
             value)
    :on-change #(save! id (->> % (value-of) (format-type field)))})
 
+
+(defmethod init-field :lookup
+  [[_ {:keys [field id lookup-table lookup-label] :as attrs} :as component] {:keys [doc] :as opts}]
+  (let [label-path (reaction ((keyword (str lookup-table "." (str lookup-label))) @doc))]
+    (fn []
+      [:div.form-group
+       (when (not-empty @label-path)
+         [:input.form-control {:read-only true :type :text :value  @label-path}])
+       [show-on-click
+        :title "Lookup"
+        :trigger [Button {:bs-style "primary"}
+                  [FaIcon "search-plus"] ]
+        :body [lookup-entity-bs-table
+               :lookup-table lookup-table
+               :column-name id
+               :lookup-label lookup-label
+               :form-data doc]]])))
+
+
+(defmethod bind :lookup
+  [{:keys [field id fmt]} {:keys [get save! doc]}]
+  {:value (let [value (or (get id) "")]
+            value)
+   :on-change #(save! id (->> % (value-of) (format-type field)))})
 
 
 (defmulti re-form-input-render
@@ -195,6 +219,21 @@
     [:div
      (row (th-value metadata-item) [:input.form-control {:field :image :id (keyword id)}])
      (alert-info id)]))
+
+
+(defmethod  re-form-input-render "lookup" [metadata-item form-data]
+  (let [id (:column-name metadata-item)
+        lookup-table (:lookup-table metadata-item)
+        lookup-label (:lookup-label metadata-item)]
+    [:div
+     (row (th-value metadata-item)
+          [:input.form-control
+           {:field :lookup
+            :id (keyword id)
+            :lookup-table lookup-table
+            :lookup-label lookup-label}])
+     (alert-info id)]))
+
 
 (defmethod  re-form-input-render "password" [metadata-item form-data]
   (let [id (:column-name metadata-item)]
@@ -252,7 +291,6 @@
 
 (defmethod  re-form-input-render "select" [metadata-item form-data]
   (let [id (keyword (:column-name metadata-item))
-        label (label-name (:column-name metadata-item))
         lookup-table (:lookup-table metadata-item)
         lookup-label (keyword (:lookup-label metadata-item))
         event (keyword (plural lookup-table ))
@@ -268,7 +306,6 @@
   (let [id (keyword (:column-name metadata-item))
         data (->> (:enum-map metadata-item)
                   (map (fn [[k v]] [(name k)  v])))]
-    (prn id)
     [:div
      (row (th-value metadata-item)
           [:select.form-control {:field :list :id id}
@@ -284,8 +321,6 @@
        (remove (fn [{:keys [column-def]}] (nil? column-def)))
        (map  (juxt (comp keyword :column-name) :column-def))
        (into {})))
-
-
 
 (defn form
   [& {:keys [entity metadata form-data
@@ -322,7 +357,7 @@
       [:div
        (apply (partial show-when [bind-fields form-template form-data])
               @datas)
-;;              [:label (str @form-data)]
+              [:label (str @form-data)]
        [ButtonToolbar
         [Button
          {:bs-style "primary"

@@ -35,6 +35,13 @@
    width: 1000px
 }
 
+.modal-body .container {
+   width: 800px
+}
+
+.modal-body .container .bootstrap-table {
+   width: 800px
+}
 
 .nav-tabs {
     margin: 0;
