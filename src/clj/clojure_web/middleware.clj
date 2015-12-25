@@ -46,6 +46,7 @@
 (defn wrap-formats [handler]
   (wrap-restful-format handler {:formats [:json-kw :transit-json :transit-msgpack]}))
 
+
 (defn cache-factory [cache-protocol & options]
   (fn [result]
     (apply cache-protocol result options)))
@@ -73,7 +74,7 @@
          (merge {:login-uri "/login"
                  :logout-uri "/logout"
                  :index-uri "/"
-                 :anon "(/uploads|/permissions|/api/ui|/api-ui)"
+                 :anon "(/uploads|/permissions|/api-ui)"
                  :default-landing-uri "/login-page"
                  :unauthorized-handler #(throw+ ex/unauthorized-operation)}
                 options)]

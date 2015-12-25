@@ -12,7 +12,9 @@
                                                    show-when has-permission
                                                    show-on-click
                                                    select-to-show
-                                                   select-to-do 
+                                                   select-to-do
+                                                   alert
+                                                   dialog
                                                    FaIcon]]
             [clojure-web.components.reforms :refer [form]]
             [clojure-web.components.search-box :refer [search-box]]
@@ -108,19 +110,17 @@
             :entity    entity]]))
 
 (defn delete-entity-btn [& {:keys [entity metadatas]}]
-  (let [delete-fn (fn [row]
-                    (go (let [res (<! (http/delete (str "/"(plural entity) "/" (row "id"))))]
-                          (call-method entity "refresh"))))]
-    [select-to-do
-     :trigger [Button {:bs-style "primary"}
-               [Glyphicon {:glyph "minus"}] "Delete"]
-     :select-fn (fn []
-                  (->>
-                   (call-method entity "getSelections")
-                   (first)
-                   (js->clj)))
-
-     :confirm-fn delete-fn]))
+  [select-to-do
+   :trigger [Button {:bs-style "primary"}
+             [Glyphicon {:glyph "minus"}] "Delete"]
+   :select-fn (fn []
+                (->>
+                 (call-method entity "getSelections")
+                 (first)
+                 (js->clj)))
+   :confirm-fn (fn [row]
+                 (go (let [res (<! (http/delete (str "/"(plural entity) "/" (row "id"))))]
+                       (call-method entity "refresh"))))])
 
 (defn edit-entity-btn [& {:keys [entity metadatas]}]
   (let [form-data (atom {})]
@@ -140,16 +140,18 @@
 
      :body [form
             :submit-fn (fn [data]
-                         (let  [url (str "/" (plural entity) "/" (:id @data))]
-                           (go
-                             (<! (http/put
-                                  url
-                                  {:form-params
-                                   (->> (dissoc @data :id :errors)
-                                        (filter (fn [[k v]] (not-empty (str v))))
-                                        (into {}))}))
-                             (call-method entity "refresh")
-                             (reset! data {}))))
+                         (go (let [url (str "/" (plural entity) "/" (:id @data))
+                                   res (<! (http/put
+                                            url
+                                            {:form-params
+                                             (->> (dissoc @data :id :errors)
+                                                  (filter (fn [[k v]] (not-empty (str v))))
+                                                  (into {}))}))]
+                               (if (:success res)
+                                 (dialog :message "Updated successfully")
+                                 (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
+                               (call-method entity "refresh")
+                               (reset! data {}))))
             :metadata  metadatas
             :form-data form-data
             :entity    entity]]))

@@ -1,11 +1,8 @@
 (ns clojure-web.components.common
-  (:require-macros [cljs.core.async.macros :refer [go]]
-                   [secretary.core         :refer [defroute]]
+  (:require-macros [secretary.core :refer [defroute]]
                    [reagent.ratom :refer [reaction]])
   (:require [cljs-http.client
              :as http]
-            [cljs.core.async
-             :refer [<!]]
             [reagent.core
              :as    reagent
              :refer [atom render-component]]
@@ -26,6 +23,13 @@
             [cljsjs.react-bootstrap]
             [inflections.core :refer  [plural titleize]]
             [clojure.set :as set]))
+
+(defn alert [& {:keys [keys] :as options}]
+  (.alert js/BootstrapDialog (clj->js options)))
+
+(defn dialog [& {:keys [keys] :as options}]
+  (.show js/BootstrapDialog (clj->js options)))
+
 
 (defn close [show-flag]
   (fn [e]
@@ -140,8 +144,13 @@
         lookup-table (:lookup-table metadata)
         lookup-table-alise (:lookup-table-alise metadata)
         lookup-label (:lookup-label metadata)]
-    (prn row)
-    (prn lookup-label)
+    ((keyword (str (or lookup-table-alise lookup-table) "." lookup-label)) row)))
+
+(defmethod td-value "lookup" [metadata row]
+  (let [column-name (:column-name metadata)
+        lookup-table (:lookup-table metadata)
+        lookup-table-alise (:lookup-table-alise metadata)
+        lookup-label (:lookup-label metadata)]
     ((keyword (str (or lookup-table-alise lookup-table) "." lookup-label)) row)))
 
 (defmethod td-value "enum" [metadata-item row]
@@ -153,6 +162,7 @@
                         (keyword)
                         (enum-map))]
     column-val))
+
 (defmethod td-value "attachment"
   [metadata row]
   ((keyword (str (:column-name metadata) ".path")) row))
@@ -206,6 +216,7 @@
            confirm-title "Notification" confirm-message "Are you sure?"}}]
   (let [selected-show? (reagent/atom false)
         no-selected-show? (reagent/atom false)
+        notification-show? (reagent/atom false)
         args (atom {})]
     (fn []
       [:div
@@ -254,6 +265,21 @@
          [Button
           {:on-click (fn [e]
                        (reset! no-selected-show? false)
+                       (.preventDefault e))}
+          "Ok"]]]
+         [Modal
+        {:show @notification-show?
+         :on-hide (fn [e]
+                    (reset! notification-show? false)
+                    (.preventDefault e))
+         :bs-size "large"
+         :aria-labelledby "contained-modal-title-lg"}
+        [ModalHeader {:close-button true} [ModalTitle alert-title]]
+        [ModalBody  alert-message]
+        [ModalFooter
+         [Button
+          {:on-click (fn [e]
+                       (reset! notification-show? false)
                        (.preventDefault e))}
           "Ok"]]]])))
 

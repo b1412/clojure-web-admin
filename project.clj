@@ -27,6 +27,7 @@
                  [org.webjars.bower/bootstrap-fileinput "4.2.7"]
                  [org.webjars.npm/react "0.14.2"]
                  [org.webjars.bower/eonasdan-bootstrap-datetimepicker "4.17.37"]
+                 [org.webjars.bower/bootstrap3-dialog "1.34.4"]
                  [ring/ring-defaults "0.1.5"]
                  [ring "1.4.0"]
                  [metosin/ring-middleware-format "0.6.0"]
@@ -99,13 +100,8 @@
                   :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
                   :garden {:builds [{:id "screen"
                                      :source-paths ["src/clj"]
-                                     :stylesheet clojure-web.css/screen
-                                     :compiler {:output-to "resources/public/assets/css/screen.css"
-                                                :pretty-print? true}}
-                                    {:id "screen2"
-                                     :source-paths ["src/clj"]
-                                     :stylesheet clojure-web.css/screen2
-                                     :compiler {:output-to "resources/public/assets/css/screen2.css"
+                                     :stylesheet clojure-web.css/customize
+                                     :compiler {:output-to "resources/public/assets/css/customize.css.new"
                                                 :pretty-print? true}}]}
 
                   :figwheel

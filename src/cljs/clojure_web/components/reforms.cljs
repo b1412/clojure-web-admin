@@ -323,8 +323,7 @@
        (into {})))
 
 (defn form
-  [& {:keys [entity metadata form-data
-             show? submit-fn]}]
+  [& {:keys [entity metadata form-data show? submit-fn]}]
   (when (empty? @form-data)
     (reset! form-data (get-defs @metadata)))
   (let [validators (get-validators @metadata)
@@ -357,7 +356,7 @@
       [:div
        (apply (partial show-when [bind-fields form-template form-data])
               @datas)
-              [:label (str @form-data)]
+;;              [:label (str @form-data)]
        [ButtonToolbar
         [Button
          {:bs-style "primary"

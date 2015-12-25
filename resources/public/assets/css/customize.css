@@ -4,6 +4,7 @@
   border-bottom: 1px solid #e5e5e5;
   background-color: #428bca;
 }
+
 .modal-title {
     color: #fff;
     display: inline-block;
@@ -19,8 +20,6 @@
     margin-top: 1px;
 }
 
-
-
 .form-group .error {
     font-weight: normal;
     ;background: #d9534f;
@@ -30,6 +29,7 @@
     padding: 1px 4px;
     margin-top: 1px;
 }
+
 
 .bootstrap-table {
    width: 1000px

@@ -25,6 +25,7 @@
                  "/assets/css/bootstrap-editable.css"
                  "/assets/css/error-pages.css"
                  "/assets/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css"
+                 "/assets/bootstrap3-dialog/dist/css/bootstrap-dialog.css"
                  "/assets/css/font-awesome.css"
                  "/assets/css/re-com.css"
                  "/assets/css/customize.css"]]
@@ -41,7 +42,7 @@
                  "/assets/js/bootstrap-editable.min.js"
                  "/assets/js/bootstrap-show-password.js"
                  "/assets/js/react-bootstrap-switch.js"
-                 "/assets/js/jquery.download.js"
+                 "/assets/bootstrap3-dialog/dist/js/bootstrap-dialog.js"
                  "/assets/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"
                  "/assets/bootstrap-treeview/dist/bootstrap-treeview.min.js"
                  "/assets/bootstrap-table/dist/bootstrap-table.js"]]

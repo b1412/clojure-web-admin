@@ -45,13 +45,8 @@
                                6
                                [[Col {:md 1 :md-offset (- 7 (rem (count inputs) 6))}
                                  [Button {:on-click
-                                          (fn [] (prn @params)
-                                            (.attr (js/$ ".fixed-table-body table")
-                                                   "data-url"
-                                                   @params)
-                                            (prn (.attr (js/$ ".fixed-table-body table")
-                                                        "data-url"))
-                                            (call-method entity "refresh"))}
+                                          (fn []
+                                            (call-method entity "refresh" {:query @params}))}
                                   [Glyphicon {:glyph "search"}] "Search"]]] %))
                     (map (fn [rows]
                            (->> rows

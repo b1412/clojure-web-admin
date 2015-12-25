@@ -23,7 +23,7 @@
             [korma.core :as k]
             [ring.util.http-response :refer [file-response header ok]]
             [slingshot.slingshot :refer [throw+]]
-            [taoensso.timbre :refer [debug info]]))
+            [taoensso.timbre :as log]))
 
 (defn current-time
   "Get current time in format (1111-11-11T11:11:11)"
@@ -119,9 +119,8 @@
 (defmethod op-val-adapter "like" [[k [op v]]]
   [k [op (str "%" v "%")]])
 
-
 (defn query-params [params]
-  (debug "pre cond" params)
+  (log/debug "pre cond" params)
   (let [grouped-params (group-by #(.endsWith (name (key %)) "-op") params)
         params (into {} (grouped-params false))
         table (:entity params)
@@ -144,7 +143,7 @@
                     (into {})
                     (map (fn [[k v]] {(dash->underscore k) v}))
                     (into {}))]
-    (debug "post cond" params)
+    (log/debug "post cond" params)
     params))
 
 
@@ -167,11 +166,15 @@
      (keyword (str (name k) ".path")) (:path u)}))
 
 (defn query-entity
-  [entity conds]
-  (debug "query " entity " " conds)
-  (let [base-query (-> (k/select* entity)
+  [entity params]
+  (log/debug "query " (:table entity) " " params)
+  (let [params (->> params
+                    (append-cols-if-exist
+                     entity
+                     {:deleted 0}))
+        base-query (-> (k/select* entity)
                        (e/join-table entity)
-                       (k/where (query-params conds)))
+                       (k/where (query-params params)))
         cnt  (-> base-query
                  (k/aggregate (count :*) :cnt)
                  (k/select)
@@ -179,10 +182,10 @@
                  (:cnt))
         result (-> base-query
                    (e/alias-fields entity)
-                   (k/order ((comp dash->underscore keyword #(:sort  % :id)) conds)
-                            ((comp keyword #(:order % :DESC)) conds))
-                   (k/offset (:offset conds  0))
-                   (k/limit (:limit conds 10))
+                   (k/order ((comp dash->underscore keyword #(:sort  % :id)) params)
+                            ((comp keyword #(:order % :DESC)) params))
+                   (k/offset (:offset params 0))
+                   (k/limit (:limit params 10))
                    (k/select))
         result (->> result
                     (pmap #(->> %
@@ -198,12 +201,17 @@
 (defmethod value-in-adapter :default [entity [k v]]
   [k v])
 
+(defmethod value-in-adapter :int [entity [k v]]
+  (if (integer? v)
+    [k v]
+    [k (Integer/parseInt v)]))
+
 (defmethod value-in-adapter :password [entity [k v]]
   [k (password/encrypt v)])
 
 
 (defn create-entity [entity params]
-  (debug  "create " (:name entity) "  " params)
+  (log/debug  "create " (:name entity) "  " params)
   (let [metadatas (e/get-all-columns-with-comment (:name entity))
         validators (get-validators metadatas)
         result (apply (partial b/validate params) validators)
@@ -211,15 +219,19 @@
         s-scope (:s-scope params)
         current-user (:current-user params)
         params (->> params
+                    (map (partial value-in-adapter (:name entity)))
+                    (into {})
+                    (doall))
+        params (->> params
                     (remove #(sys-params (key %)))
                     (into {})
                     (append-cols-if-exist
                      entity
                      {:creator-id (:id current-user)
                       :created-at (current-time)
-                      :updated-at (current-time)})
-                    (map (partial value-in-adapter (:name entity)))
-                    (into {}))]
+                      :updated-at (current-time)
+                      :version 1
+                      :deleted 0}))]
 
     (if errs
         (throw+ {:type ex/illegal-argument
@@ -231,8 +243,8 @@
         (k/insert))))
 
 (defn get-entity [entity id params]
-  (debug "get" (:name entity) id)
-  (debug "pre" params)
+  (log/debug "get" (:name entity) id)
+  (log/debug "pre" params)
   (let [scope (:s-scope params)
         curr-user (:current-user params)
         params (->> (assoc params :id id)
@@ -240,7 +252,7 @@
                     (into {})
                     (map (fn [[k v]] {(dash->underscore k) v}))
                     (into {}))]
-    (debug "post" params)
+    (log/debug "post" params)
 
     (if (= "-1" id)
       (->> (e/get-column-names (:name entity))
@@ -258,34 +270,36 @@
 (defn optimistic-lock
   "Compare update-time of the current entity with update-time in DB"
   [id entity update-time]
-  (if (contains-column? entity :update-time)
+  (if (contains-column? entity :version)
     (let [time-in-db (-> (k/select* entity)
                          (k/where {:id id})
                          (k/select)
                          (first)
-                         (:update-time)
-                         (#(f/unparse (f/formatters :date-hour-minute-second) %)))]
-      (if (not= time-in-db update-time)
-        (throw+ {:type ::already-updated
-                 :message "The record you updating already updated by others,
-                           please refresh it first"})))))
+                         (:version))]
+
+      (if-not (= time-in-db (Integer/parseInt update-time))
+        (throw+ {:type ex/not-up-to-date
+                 :message "The record has already been updated by some else.
+                           Please refresh the table first!"})))))
 
 (defn update-entity [entity id params]
-  (debug "pre" params)
-  (optimistic-lock  id entity (:updated-at params))
-  (let [scope (:s-scope params)
+  (log/debug "pre" params)
+  (optimistic-lock id entity (:version params))
+  (let [metadatas (e/get-all-columns-with-comment (:name entity))
+        scope (:s-scope params)
         curr-user (:current-user params)
-        metadatas (e/get-all-columns-with-comment (:name entity))
         validators (get-validators metadatas)
         result (apply (partial b/validate params) validators)
         errs (get result 0)
         params (->> params
+                    (map (partial value-in-adapter (:name entity)))
+                    (into {}))
+        params (->> params
                     (remove-unknown-columns entity)
                     (into {})
-                    (append-cols-if-exist entity {:updated-at (current-time)})
-                    (map (partial value-in-adapter (:name entity)))
-                    (into {}))]
-    (debug "post"  params)
+                    (append-cols-if-exist entity {:updated-at (current-time)
+                                                  :version (inc (:version params))}))]
+    (log/debug "post"  params)
     (data-level-access entity scope id curr-user)
     (-> (k/update* entity)
         (k/set-fields params)
@@ -294,16 +308,18 @@
 
 (defn delete-entity [entity id params]
   (let [scope (:s-scope params)
-        curr-user (:current-user params)
-        params (->> params
-                    (remove-unknown-columns entity)
-                    (into {})
-                    (append-cols-if-exist entity {:update-time (current-time)}))]
+        curr-user (:current-user params)]
     (data-level-access entity scope id curr-user)
-    (-> (k/delete* entity)
-        (e/join-table entity)
-        (k/where {:id id})
-        (k/delete))))
+    (if (contains-column? entity :deleted)
+      (-> (k/update* entity)
+          (k/set-fields {:deleted 1})
+          (k/where {:id id})
+          (k/update))
+
+      (-> (k/delete* entity)
+          (e/join-table entity)
+          (k/where {:id id})
+          (k/delete)))))
 
 (defn render-file [entity]
   (excel/export-file entity)
@@ -317,7 +333,7 @@
 
 
 (defn extract-from-excel [entity params]
-  (debug params)
+  (log/debug params)
   (let [columns (->> (e/get-all-columns-with-comment (:table entity))
                      (filter (partial has-feature? :importable))
                      (mapv :column-name))

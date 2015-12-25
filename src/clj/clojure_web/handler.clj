@@ -45,27 +45,19 @@
   (timbre/info "clojure-web is shutting down...")
   (timbre/info "shutdown complete!"))
 
-(defn custom-handler [^Exception e data request]
-  (timbre/error e)
-  {:status 500
-   :headers {"Content-Type" "text/html"}
-   :body "System bussion"})
-
 (defn sym-handler [^Exception e data request]
   (timbre/error e)
   {:status 500
    :headers {"Content-Type" "text/html"}
-   :body (.getMessage e)})
+   :body (:message (read-string (subs (.getMessage e) 8)))})
 
 
 (defapi app-routes
   {:exceptions
-   {:handlers {ex/unknown
-               sym-handler
-               ex/unauthorized-operation
+   {:handlers {ex/unauthorized-operation
                sym-handler
                :compojure.api.exception/default
-               custom-handler}}}
+               sym-handler}}}
   (swagger-ui  "/api-ui")
   (swagger-docs {:info {:title "Clojure Web API"}})
   brand-routes
