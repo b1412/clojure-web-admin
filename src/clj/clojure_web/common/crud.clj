@@ -7,6 +7,7 @@
             [clojure.string :as str]
             [clojure-web.common
              [excel :as excel]
+             [fingerprint :as fingerprint]
              [kit :refer [create-kw dash->underscore subs-before underscore->dash]]]
             [clojure-web
              [metadata-kit :refer [has-feature?]]
@@ -212,6 +213,7 @@
 
 (defn create-entity [entity params]
   (log/debug  "create " (:name entity) "  " params)
+
   (let [metadatas (e/get-all-columns-with-comment (:name entity))
         validators (get-validators metadatas)
         result (apply (partial b/validate params) validators)
@@ -231,16 +233,20 @@
                       :created-at (current-time)
                       :updated-at (current-time)
                       :version 1
-                      :deleted 0}))]
+                      :deleted 0}))
+        save (fn[params](-> (k/insert* entity)
+                     (k/values params)
+                     (k/insert)))]
+
 
     (if errs
         (throw+ {:type ex/illegal-argument
                  :message (->> errs
                                (map (fn [[_ v]] (first v)))
                                (str/join ". "))}))
-    (-> (k/insert* entity)
-        (k/values params)
-        (k/insert))))
+    (if (contains-column? entity :fingerprint)
+      (fingerprint/create entity params save)
+      (save))))
 
 (defn get-entity [entity id params]
   (log/debug "get" (:name entity) id)
@@ -298,7 +304,7 @@
                     (remove-unknown-columns entity)
                     (into {})
                     (append-cols-if-exist entity {:updated-at (current-time)
-                                                  :version (inc (:version params))}))]
+                                                  :version ((fnil inc 0) (:version params))}))]
     (log/debug "post"  params)
     (data-level-access entity scope id curr-user)
     (-> (k/update* entity)

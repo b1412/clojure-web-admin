@@ -8,11 +8,17 @@
                  [clj-time "0.11.0"]
                  [clojure-humanize "0.1.0"]
                  [inflections "0.10.0"]
+                 ;;partern match
                  [defun "0.3.0-alapha"]
+                 ;;orm
                  [korma "0.4.0"] 
                  [superstring "2.1.0"]
+                 ;;exception
                  [slingshot "0.12.2"]
+                 ;;log
                  [com.taoensso/timbre "4.1.1"]
+                 ;;I18n&L10n
+                 [com.taoensso/tower "3.0.2"]
                  [pandect "0.5.4"]
                  [environ "1.0.1"]
                  [com.infolace/excel-templates "0.3.1"]
@@ -20,6 +26,7 @@
                  [ring-webjars "0.1.1"]
                  [cljsjs/react "0.14.0-1"]
                  [cljsjs/react-bootstrap "0.25.1-0"]
+                 
                  [org.webjars/bootstrap "3.3.5"]
                  [org.webjars/jquery "2.1.4"]
                  [org.webjars.bower/bootstrap-treeview "1.2.0"]
@@ -28,6 +35,7 @@
                  [org.webjars.npm/react "0.14.2"]
                  [org.webjars.bower/eonasdan-bootstrap-datetimepicker "4.17.37"]
                  [org.webjars.bower/bootstrap3-dialog "1.34.4"]
+                 
                  [ring/ring-defaults "0.1.5"]
                  [ring "1.4.0"]
                  [metosin/ring-middleware-format "0.6.0"]
@@ -37,7 +45,6 @@
                  [org.clojure/tools.nrepl "0.2.11"]
                  [org.clojure/clojurescript "1.7.145" :scope "provided"]
                  [shodan "0.4.2"]
-                 [spellhouse/clairvoyant "0.0-72-g15e1e44"]
                  [org.clojure/tools.reader "0.9.2"]
                  [reagent "0.5.1"]
                  [re-frame "0.4.1"]

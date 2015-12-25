@@ -20,4 +20,5 @@
                          :lookup-table-alise :lookup-label :searchable
                          :search-op :hidden-in-grid :hidden-in-form
                          :exportable :importable :column-size :truncatable
-                         :decimal-digits :chart-value :chart-label})
+                         :decimal-digits :chart-value :chart-label
+                         :fingerprintable})
