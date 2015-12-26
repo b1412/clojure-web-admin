@@ -19,6 +19,10 @@
                  [com.taoensso/timbre "4.1.1"]
                  ;;I18n&L10n
                  [com.taoensso/tower "3.0.2"]
+                 
+                 ;;schedual jobs
+                 [clojurewerkz/quartzite "2.0.0"]
+
                  [pandect "0.5.4"]
                  [environ "1.0.1"]
                  [com.infolace/excel-templates "0.3.1"]

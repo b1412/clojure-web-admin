@@ -1,6 +1,7 @@
 (ns clojure-web.handler
   (:require [clojure-web
              [exceptions :as ex]
+             [jobs :as jobs]
              [middleware :as middleware]
              [render :as render]]
             [clojure-web.routes
@@ -16,8 +17,10 @@
             [environ.core :refer [env]]
             [compojure.api.sweet :refer [defapi defroutes* swagger-docs]]
             [ring.swagger.ui :refer [swagger-ui]]
-            [taoensso.timbre :as timbre]
+            [taoensso.timbre :as log]
             [taoensso.timbre.appenders.3rd-party.rotor :as rotor]))
+
+
 
 (defn init
   "init will be called once when
@@ -26,14 +29,15 @@
    put any initialization code here"
   []
 
-  (timbre/merge-config!
+  (log/merge-config!
    {:level (if (env :dev) :trace :info)
     :appenders {:rotor (rotor/rotor-appender
                         {:path "clojure_web.log"
                          :max-size (* 512 1024)
                          :backlog 10})}})
 
-  (timbre/info (str
+  (jobs/start)
+  (log/info (str
                 "\n-=[clojure-web started successfully"
                 (when (env :dev) " using the development profile")
                 "]=-")))
@@ -42,11 +46,11 @@
   "destroy will be called when your application
    shuts down, put any clean up code here"
   []
-  (timbre/info "clojure-web is shutting down...")
-  (timbre/info "shutdown complete!"))
+  (log/info "clojure-web is shutting down...")
+  (log/info "shutdown complete!"))
 
 (defn sym-handler [^Exception e data request]
-  (timbre/error e)
+  (log/error e)
   {:status 500
    :headers {"Content-Type" "text/html"}
    :body (:message (read-string (subs (.getMessage e) 8)))})
