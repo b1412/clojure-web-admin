@@ -79,6 +79,6 @@ Let`s get start!
 
 * License
 
-Copyright © 2015 [[Leon Zhou][http://blog.kidzhou.me]]
+Copyright © 2015 [[http://blog.kidzhou.me][Leon Zhou]]
 
 Distributed under the Eclipse Public License, the same as Clojure.

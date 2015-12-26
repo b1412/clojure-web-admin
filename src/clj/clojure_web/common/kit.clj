@@ -84,12 +84,12 @@
   (into {} (for [[k v] m] [(if (nil? k-fn)  k (k-fn k))
                            (if (nil? v-fn)  v (v-fn v))])))
 
-(defn slice
-  "Like subs, but support negative index"
-  ([s start]
-   (subs s start))
-  ([s start end]
-   (if (neg? end)
-     (let [end (+ end (count s))]
-       (subs s start end))
-     (subs s start end))))
+ (defn slice
+     "Like subs, but support negative index"
+     ([s start]
+      (subs s start))
+     ([s start end]
+      (if (neg? end)
+        (let [end (+ end (count s))]
+          (subs s start end))
+        (subs s start end))))

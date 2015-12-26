@@ -1,17 +1,31 @@
 (ns clojure-web.db.entity
-  (:require [clojure-web.common.kit :as kit]
-            [clojure-web.constants :refer [meta-columns]]
+  (:require [clojure.core.cache :as cache]
             [clojure.java.jdbc :as jdbc]
-            [clojure.core.cache :as cache]
+            [clojure.walk :as walk]
+            [clojure-web.common.kit :as kit]
+            [clojure-web.constants :refer [meta-columns]]
             [environ.core :refer [env]]
-            [taoensso.timbre :as log]
             [korma
              [core :as k]
              [db :refer [defdb mysql]]]
-            [superstring.core :as str])
+            [superstring.core :as str]
+            [taoensso.timbre :as log])
   (:refer-clojure :exclude [group])
   (:import [com.alibaba.druid.filter Filter]
            [com.alibaba.druid.pool DruidDataSource]))
+
+(alter-var-root
+ (var k/where*)
+ (fn [f]
+   #(f %1
+       (walk/prewalk
+        (fn [e]
+          (if (:korma.sql.utils/generated e)
+            (update e :korma.sql.utils/generated
+                    (fn [k] (str/replace k "-" "_")))
+            e)) %2))))
+
+
 
 (def mysql-db {:subprotocol "mysql"
                :subname "//127.0.0.1:3306/clojure_web"
@@ -90,8 +104,8 @@
   (jdbc/with-db-metadata [md mysql-db]
     (jdbc/metadata-result (.getTables md nil nil "" (into-array ["TABLE" "VIEW"])))))
 
-(def tables (atom (map :table_name (jdbc/with-db-metadata [md mysql-db]
-                                 (jdbc/metadata-result (.getTables md nil nil nil (into-array ["TABLE" "VIEW"])))))))
+(def tables (map :table_name (jdbc/with-db-metadata [md mysql-db]
+                               (jdbc/metadata-result (.getTables md nil nil nil (into-array ["TABLE" "VIEW"]))))))
 
 (defn get-pk [table]
   (:column_name
@@ -278,7 +292,6 @@
                        fk (kit/create-kw fk)]
                    (k/join env [t a] (= pk fk))))
                env)))
-
 
 (defn get-permissions [user]
   (-> (k/exec-raw ["select res.id, `key`, label, uri, method, scope, `type`,  parent_id
