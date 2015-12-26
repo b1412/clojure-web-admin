@@ -11,7 +11,7 @@
                                                              Tabs Tab]]
              [cljs-http.client :as http]
              [clojure-web.components.common :refer [show-on-click show-when select-to-show
-                                                    call-method]]))
+                                                    call-method alert dialog]]))
 
 
 (defn assign-table [& {:keys [data show?]}]
@@ -19,8 +19,11 @@
   (let [submit-fn (fn [data]
                     (let  [url (str "/roles/" (:id @data) "/resources")]
                       (go
-                        (<! (http/put  url {:form-params (dissoc @data :resources)}))
-                        (reset! data {}))))
+                        (let [res (<! (http/put  url {:form-params (dissoc @data :resources)}))]
+                          (if (:success res)
+                            (dialog :message "Updated successfully")
+                            (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
+                          (reset! data {})))))
         resources (subscribe [:resources])
         process-ok (fn [data]
                      (submit-fn data)
@@ -33,10 +36,9 @@
          (->> (:resources @data)
               (map (fn [e]
                      (let [chk (js/$ (str ":checkbox[value=" (:resource-id e) "]"))
-                           a   (js/$ (str "#" (:resource-id e) ))]
+                           a   (js/$ (str "#" (:resource-id e)))]
                        (.prop chk "checked" true)
-                       (.text (js/$ a) (:scope e))
-)))
+                       (.text (js/$ a) (:scope e)))))
               (doall))
          (.editable (js/$ "#resources a")
                     (clj->js {
@@ -45,50 +47,51 @@
                               :placement "right"
                               :value "system"
                               :source [{:value "system" :text "system"}
+                                       {:value "orgs" :text "orgs"}
                                        {:value "org" :text "org"}
                                        {:value "user" :text "user"}]})))
        :reagent-render
        (fn []
          (let [state (reagent/atom false)]
            [:div
-                  [Tabs
+            [Tabs
+             (doall
+              (for [[title v] (group-by :entity @resources)]
+                ^{:key title}
+                [Tab {:event-key title :title title}
+                 [Table
+                  {:id "resources"
+                   :striped true
+                   :bordered true
+                   :condensed true
+                   :hover true}
+                  [:thead
+                   [:tr
+                    [:th]
+                    (->>  ["Key" "Uri" "Desc" "Scope"]
+                          (map-indexed (fn [idx itm] ^{:key idx} [:th itm])))]]
+                  [:tbody
                    (doall
-                    (for [[title v] (group-by :entity @resources)]
-                      ^{:key title}
-                      [Tab {:event-key title :title title}
-                       [Table
-                        {:id "resources"
-                         :striped true
-                         :bordered true
-                         :condensed true
-                         :hover true}
-                        [:thead
-                         [:tr
-                          [:th]
-                          (->>  ["Key" "Uri" "Desc" "Scope"]
-                                (map-indexed (fn [idx itm] ^{:key idx} [:th itm])))]]
-                        [:tbody
-                         (doall
-                          (for [item v]
-                            ^{:key (:id item)}
-                            [:tr
-                             [:td [:input {:type "checkbox" :value (:id item)}]]
-                             [:td (:key item)]
-                             [:td (:uri item)]
-                             [:td (:desc item)]
-                             [:td [:a {:id (:id item) :href "#"}  "system"]]]))]]]))]
-                  [Button {:on-click (fn []
-                                       (let [checked (js/$ "input:checked")]
-                                         (goog.array.forEach
-                                          checked (fn [val index arr]
-                                                    (let [a (.find (.parent (.parent (js/$ val))) "a")
-                                                          resource-id (.attr (js/$ a) "id")
-                                                          scope (.html (js/$ a))]
-                                                      (when-not (nil? resource-id)
-                                                        (swap! data assoc resource-id scope)))))
-                                         (dispatch [:reset-role-ress])
-                                         (process-ok data)))}
-                   "Save"]]))})
+                    (for [item v]
+                      ^{:key (:id item)}
+                      [:tr
+                       [:td [:input {:type "checkbox" :value (:id item)}]]
+                       [:td (:key item)]
+                       [:td (:uri item)]
+                       [:td (:desc item)]
+                       [:td [:a {:id (:id item) :href "#"}  "system"]]]))]]]))]
+            [Button {:on-click (fn []
+                                 (let [checked (js/$ "input:checked")]
+                                   (goog.array.forEach
+                                    checked (fn [val index arr]
+                                              (let [a (.find (.parent (.parent (js/$ val))) "a")
+                                                    resource-id (.attr (js/$ a) "id")
+                                                    scope (.html (js/$ a))]
+                                                (when-not (nil? resource-id)
+                                                  (swap! data assoc resource-id scope)))))
+                                   (dispatch [:reset-role-ress])
+                                   (process-ok data)))}
+             "Save"]]))})
      resources)))
 
 (def role-panel (create-bs-table

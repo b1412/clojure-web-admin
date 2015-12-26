@@ -50,19 +50,17 @@
 
 (defn create [entity m save]
   (let [m (compare! entity (add entity m))]
-    (prn (:id m))
     (if (nil? (:id m))
       (save m))))
 
-
 (defn remove-expired! [entity]
   (let [ids (@expired-ids (:name entity))]
+    (log/info ids)
     (->> ids
          (map (fn [id] (-> (k/delete* entity)
                           (k/where {:id id})
                           (k/delete))))
          (doall))))
-
 
 (defn refresh!
   "Refresh all the fingerprints in db for the specific entity"
@@ -81,17 +79,16 @@
                    (k/update)))
          (doall))))
 
-
-
-
 (defn init!
   "Initialize fingerprints in db for the specific entity"
-  [entity]
-  (let [entities (k/select entity)]
-    (->> entities
-         (map :id)
-         (swap! expired-ids assoc (:name entity)))
-    (->> entities
-         (map (juxt :fingerprint :id))
-         (into {})
-         (swap! cache assoc (:name entity)))))
+  ([entity]
+   (init! entity {}))
+  ([entity params]
+   (let [entities (k/select entity (k/where params))]
+     (->> entities
+          (map :id)
+          (swap! expired-ids assoc (:name entity)))
+     (->> entities
+          (map (juxt :fingerprint :id))
+          (into {})
+          (swap! cache assoc (:name entity))))))

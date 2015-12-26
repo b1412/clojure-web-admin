@@ -74,7 +74,8 @@
   :plugins [[lein-environ "1.0.1"]
             [hiccup-bridge "1.0.1"]
             [lein-garden "0.2.6"]
-            [lein-cljsbuild "1.1.0"]]
+            [lein-cljsbuild "1.1.0"]
+            [com.palletops/uberimage "0.4.1"]]
   :cljfmt {}
   :clean-targets ^{:protect false}
   [:target-path [:cljsbuild :builds :app :compiler :output-dir]

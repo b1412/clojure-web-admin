@@ -90,9 +90,8 @@
   (jdbc/with-db-metadata [md mysql-db]
     (jdbc/metadata-result (.getTables md nil nil "" (into-array ["TABLE" "VIEW"])))))
 
-(def tables (map :table_name (jdbc/with-db-metadata [md mysql-db]
-                               (jdbc/metadata-result (.getTables md nil nil nil (into-array ["TABLE" "VIEW"]))))))
-
+(def tables (atom (map :table_name (jdbc/with-db-metadata [md mysql-db]
+                                 (jdbc/metadata-result (.getTables md nil nil nil (into-array ["TABLE" "VIEW"])))))))
 
 (defn get-pk [table]
   (:column_name

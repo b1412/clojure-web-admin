@@ -97,6 +97,9 @@
         create-fn (fn [data]
                     (let [url (str "/" (plural entity) "/")]
                       (go (let [res (<! (http/post url {:form-params (dissoc @data :errors)}))]
+                            (if (:success res)
+                                 (dialog :message "Created successfully")
+                                 (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
                             (call-method entity "refresh")
                             (reset! data {})))))]
     [show-on-click
@@ -120,6 +123,9 @@
                  (js->clj)))
    :confirm-fn (fn [row]
                  (go (let [res (<! (http/delete (str "/"(plural entity) "/" (row "id"))))]
+                       (if (:success res)
+                         (dialog :message "Deleted successfully")
+                         (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
                        (call-method entity "refresh"))))])
 
 (defn edit-entity-btn [& {:keys [entity metadatas]}]

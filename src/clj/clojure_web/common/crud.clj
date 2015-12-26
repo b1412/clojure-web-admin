@@ -246,7 +246,7 @@
                                (str/join ". "))}))
     (if (contains-column? entity :fingerprint)
       (fingerprint/create entity params save)
-      (save))))
+      (save params))))
 
 (defn get-entity [entity id params]
   (log/debug "get" (:name entity) id)
