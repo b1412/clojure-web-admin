@@ -1,7 +1,9 @@
 (ns clojure-web.components.entity-bs-table
   (:require-macros [cljs.core.async.macros :refer [go]]
                    [reagent.ratom :refer [reaction]])
-  (:require [cljs-http.client :as http]
+  (:require [bouncer.core :as b]
+            [clojure-web.validate :refer [get-validators]]
+            [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [shodan.console :as console :include-macros true]
             [reagent.core   :as reagent :refer [atom render-component]]
@@ -15,6 +17,7 @@
                                                    select-to-do
                                                    alert
                                                    dialog
+                                                   close
                                                    FaIcon]]
             [clojure-web.components.reforms :refer [form]]
             [clojure-web.components.search-box :refer [search-box]]
@@ -37,7 +40,7 @@
 
 (defn render-charts [metadatas entity entities]
   (let [label (->> metadatas
-                   (filter #(= 1 (:chart-label % 0)))
+                   (filter #(= 1 (:chart-label % 0))) 
                    (first)
                    (:column-name)
                    (keyword))
@@ -96,21 +99,39 @@
   (let [form-data (atom {})
         create-fn (fn [data]
                     (let [url (str "/" (plural entity) "/")]
-                      (go (let [res (<! (http/post url {:form-params (dissoc @data :errors)}))]
+                      (go (let [res (<! (http/post url {:form-params (dissoc data :errors)}))]
                             (if (:success res)
                                  (dialog :message "Created successfully")
                                  (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
                             (call-method entity "refresh")
-                            (reset! data {})))))]
+                           ))))]
     [show-on-click
+     :title (titleize (str "New " entity))
      :trigger
      [Button {:bs-style "primary"}
       [Glyphicon {:glyph "plus"}] "New"]
      :body [form
-            :submit-fn create-fn
             :metadata  metadatas
             :form-data form-data
-            :entity    entity]]))
+            :entity    entity]
+     :footer [[Button
+               {:bs-style "primary"
+                :on-click
+                (fn []
+                  (let [validators (get-validators @metadatas)
+                        result (apply (partial b/validate @form-data) validators)
+                        errs (get result 0)]
+                    (if errs
+                      (do (->> errs
+                             (map (fn [[k v]]
+                                    (swap! form-data assoc-in [:errors k] (first v))))
+                             (doall))
+                          nil)
+                      (do
+                        (create-fn @form-data)
+                        (reset! form-data {})))))}
+               "Save"]
+              [Button {} "Cancel"]]]))
 
 (defn delete-entity-btn [& {:keys [entity metadatas]}]
   [select-to-do
@@ -129,7 +150,20 @@
                        (call-method entity "refresh"))))])
 
 (defn edit-entity-btn [& {:keys [entity metadatas]}]
-  (let [form-data (atom {})]
+  (let [form-data (atom {})
+        submit-fn (fn [data]
+                    (go (let [url (str "/" (plural entity) "/" (:id data))
+                              res (<! (http/put
+                                       url
+                                       {:form-params
+                                        (->> (dissoc data :id :errors)
+                                             (filter (fn [[k v]] (not-empty (str v))))
+                                             (into {}))}))]
+                          (if (:success res)
+                            (dialog :message "Updated successfully")
+                            (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
+                          (call-method entity "refresh"))))
+        validators (get-validators @metadatas)]
     [select-to-show
      :title (str "Edit " (titleize entity))
      :trigger [Button {:bs-style "primary"}
@@ -142,25 +176,32 @@
                    (map (fn [[k v]] [(keyword k) v]))
                    (into {})))
      :load-row-fn (fn [body row]
-                    (merge body :form-data row))
+                    (reset! form-data @row)
+                    body)
 
      :body [form
-            :submit-fn (fn [data]
-                         (go (let [url (str "/" (plural entity) "/" (:id @data))
-                                   res (<! (http/put
-                                            url
-                                            {:form-params
-                                             (->> (dissoc @data :id :errors)
-                                                  (filter (fn [[k v]] (not-empty (str v))))
-                                                  (into {}))}))]
-                               (if (:success res)
-                                 (dialog :message "Updated successfully")
-                                 (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
-                               (call-method entity "refresh")
-                               (reset! data {}))))
             :metadata  metadatas
             :form-data form-data
-            :entity    entity]]))
+            :entity    entity]
+     :footer
+     [[Button
+        {:bs-style "primary"
+         :on-click
+         (fn []
+           (let [result (apply (partial b/validate @form-data) validators)
+                 errs (get result 0)]
+             (if errs
+               (do
+                 (->> errs
+                      (map (fn [[k v]]
+                             (swap! form-data assoc-in [:errors k] (first v))))
+                      (doall))
+                 nil)
+               (do
+                 (submit-fn  @form-data)
+                 (reset! form-data {})))))}
+       "Save"]
+      [Button {} "Cancel"]]]))
 
 (defn export-entity-btn [& {:keys [entity metadatas] }]
   [Button {:bs-style "primary"
@@ -197,31 +238,25 @@
         metadatas (subscribe [entity-metadata])
         show? (reaction (not-empty @metadatas))
         entity-btns {(str "new-" entity)
-                     [new-entity-btn
-                      :metadatas metadatas
-                      :entity entity]
+                     [new-entity-btn]
                      (str "delete-" entity)
-                     [delete-entity-btn
-                      :metadatas metadatas
-                      :entity entity]
+                     [delete-entity-btn]
                      (str "edit-" entity)
-                     [edit-entity-btn
-                      :metadatas metadatas
-                      :entity entity]
-                     (str   "export-" entity "-excel")
-                     [export-entity-btn
-                      :entity entity
-                      :metadatas metadatas]
-                     (str   "import-" entity "-excel")
-                     [import-entity-btn :entity entity
-                      :metadatas metadatas]
+                     [edit-entity-btn]
+                     (str  "export-" entity "-excel")
+                     [export-entity-btn]
+                     (str  "import-" entity "-excel")
+                     [import-entity-btn]
                      (str entity "-charts")
-                     [entity-charts-btn
-                      :entity entity
-                      :metadatas metadatas]}
-        btns (merge entity-btns btns)
-        anonymous-btns (filter (fn [[permission btn]] (= :anonymous permission)) btns)
-        protected-btns (remove (fn [[permission btn]] (= :anonymous permission)) btns)]
+                     [entity-charts-btn]}
+        btns (->> btns
+                  (merge entity-btns)
+                  (map (fn [[k v]] [k (merge v
+                                            :entity entity
+                                            :metadatas metadatas)]))
+                  (into {}))
+        anonymous-btns (filter (fn [[permission btn]] (= :anon permission)) btns)
+        protected-btns (remove (fn [[permission btn]] (= :anon permission)) btns)]
 
     (dispatch [get-entity-metadata])
     (fn []

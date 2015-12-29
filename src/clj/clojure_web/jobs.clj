@@ -11,6 +11,10 @@
   (log/info "Does nothing"))
 
 
+(defn del-unused-files []
+  ( ))
+
+
 (defjob CleanJob [ctx]
   ;; type-name   image and attachment
   (->> @e/tables

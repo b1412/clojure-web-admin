@@ -25,8 +25,6 @@
                     (fn [k] (str/replace k "-" "_")))
             e)) %2))))
 
-
-
 (def mysql-db {:subprotocol "mysql"
                :subname "//127.0.0.1:3306/clojure_web"
                :user "root"

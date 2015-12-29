@@ -10,8 +10,7 @@
             [re-frame.core :refer [dispatch subscribe]]
             [superstring.core :as str]
             [clojure-web.components.common :refer [th-value label-name render-in-conds
-                                                   show-on-click show-when close
-                                                   FaIcon]]
+                                                   show-on-click show-when FaIcon]]
             [clojure-web.components.bs-table :refer [lookup-entity-bs-table]]
             [clojure-web.uploads :refer [bs-file-upload]]
             [clojure-web.components.react-bootstrap :refer [Input
@@ -326,15 +325,12 @@
   [& {:keys [entity metadata form-data show? submit-fn]}]
   (when (empty? @form-data)
     (reset! form-data (get-defs @metadata)))
-  (let [validators (get-validators @metadata)
-        process-ok (fn [data]
-                     (submit-fn data)
-                     (reset! show? false))
-        form-template (->> @metadata
+  (let [form-template (->> @metadata
                            (map-indexed
                             (fn [idx itm]
                               (render-in-conds
-                               ^{:key idx}
+
+                              ^{:key idx}
                                (re-form-input-render itm form-data)
                                itm
                                :hidden-in-form
@@ -357,20 +353,4 @@
        (apply (partial show-when [bind-fields form-template form-data])
               @datas)
 ;;              [:label (str @form-data)]
-       [ButtonToolbar
-        [Button
-         {:bs-style "primary"
-          :on-click
-          (fn []
-            (let [result (apply (partial b/validate @form-data) validators)
-                  errs (get result 0)]
-              (if errs
-                (->> errs
-                     (map (fn [[k v]]
-                            (swap! form-data assoc-in [:errors k] (first v))))
-                     (doall))
-                (process-ok form-data))))}
-         "Save"]
-        [Button
-         {:on-click (close show?)}
-         "Cancel"]]])))
+])))

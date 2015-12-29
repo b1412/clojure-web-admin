@@ -170,7 +170,7 @@
 
 (defn show-on-click
   "Show second component when first component clicked "
-  [& {:keys [trigger body title on-hide]
+  [& {:keys [trigger body title on-hide footer]
       :or {title "Information" }}]
   (let [show? (reagent/atom false)]
     (fn []
@@ -191,7 +191,22 @@
                      (when on-hide (on-hide))
                      (reset! show? false))}
          [ModalTitle title]]
-        [ModalBody  (merge body :show? show?)]]])))
+        [ModalBody  (merge body :show? show?)]
+        (->> footer
+             (map (fn [e]
+                    (update-in e
+                               [1 :on-click]
+                               (fn [f]
+                                 (fn [e]
+                                   (do
+                                     (if f
+                                       (do (when (f)
+                                             (reset! show? false))
+                                           (.preventDefault e))
+                                       (do (reset! show? false)
+                                           (.preventDefault e)))))))))
+             (concat [ModalFooter])
+             (vec))]])))
 
 
 
@@ -290,7 +305,8 @@
              selected-on-hide
              load-row-fn load-data-fn
              event dispatch-fn title
-             alert-title alert-message]
+             alert-title alert-message
+             footer]
       :or {alert-title "Notification"
            alert-message "Please select one record!"
            title "Information"}}]
@@ -320,17 +336,34 @@
                     (reset! selected-show? false))
          :bs-size "large"
          :aria-labelledby "contained-modal-title-lg"}
+
         [ModalHeader
          {:close-button true
           :on-hide (fn [e]
                      (when selected-on-hide (selected-on-hide))
                      (reset! selected-show? false))}
          [ModalTitle title]]
-        [ModalBody  (if (nil? event)
-                      (load-row-fn body row)
+
+        [ModalBody  (if event
                       (let [data (subscribe [event])]
                         (show-when
-                         (load-data-fn body row data) data)))]]
+                         (load-data-fn body row data) data))
+                      (load-row-fn body row))]
+        (->> footer
+             (map (fn [e]
+                     (update-in e
+                                [1 :on-click]
+                                (fn [f]
+                                  (fn [e]
+                                    (do
+                                     (if f
+                                       (do (when (f)
+                                             (reset! selected-show? false))
+                                           (.preventDefault e))
+                                       (do (reset! selected-show? false)
+                                           (.preventDefault e)))))))))
+             (concat [ModalFooter])
+             (vec))]
 
        [Modal
         {:show @no-selected-show?
@@ -346,6 +379,8 @@
                        (reset! no-selected-show? false)
                        (.preventDefault e))}
           "Ok"]]]])))
-
+(comment
+  footer
+             )
 (defn FaIcon [name]
   [:i {:class (str "fa fa-" name)}])

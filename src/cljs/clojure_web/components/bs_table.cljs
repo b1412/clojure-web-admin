@@ -61,8 +61,10 @@
                              (metadata->bst-data metadata)))}]
     (reagent/create-class
      {:component-did-mount
-      #(.bootstrapTable (js/$ (str "#" entity "-table"))
-                        (clj->js cols))
+      (fn []
+        (prn "table rendering..")
+        (.bootstrapTable (js/$ (str "#" entity "-table"))
+                         (clj->js cols)))
       :reagent-render
       (fn []
         [:div.container
