@@ -115,11 +115,17 @@
 
 (def table->entity (atom {}))
 
+(def underscore-kw (comp keyword #(clojure.string/replace % "-" "_") name))
+
+(def dasherize-kw  (comp keyword #(clojure.string/replace % "_" "-") name))
+
+(def map-keys (fn [f m] (reduce-kv #(assoc %1 (f %2) %3) {} m)))
+
 (defmacro defent [table & body]
   `(do (declare ~table)
        (k/defentity ~table
-         (k/transform kit/column-adapter)
-         (k/prepare kit/column-adapter2)
+         (k/prepare   (partial map-keys underscore-kw))
+         (k/transform (partial map-keys dasherize-kw))
          (k/table (-> (:name (meta (var ~table)))
                       (str/replace #"-" "_")
                       (keyword)))

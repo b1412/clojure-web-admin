@@ -3,7 +3,6 @@
             [clojure-web.metadata-kit :refer [has-feature?]]
             [pandect.algo.md5 :refer [md5]]
             [korma.core :as k]
-            [taoensso.timbre :as log]
             [slingshot.slingshot :refer [throw+]]))
 
 (def cache (atom {}))
@@ -55,12 +54,25 @@
 
 (defn remove-expired! [entity]
   (let [ids (@expired-ids (:name entity))]
-    (log/info ids)
     (->> ids
          (map (fn [id] (-> (k/delete* entity)
                           (k/where {:id id})
                           (k/delete))))
          (doall))))
+
+(defn init!
+  "Initialize fingerprints in db for the specific entity"
+  ([entity]
+   (init! entity {}))
+  ([entity params]
+   (let [entities (k/select entity (k/where params))]
+     (->> entities
+          (map :id)
+          (swap! expired-ids assoc (:name entity)))
+     (->> entities
+          (map (juxt :fingerprint :id))
+          (into {})
+          (swap! cache assoc (:name entity))))))
 
 (defn refresh!
   "Refresh all the fingerprints in db for the specific entity"
@@ -78,17 +90,3 @@
                    (k/where {:id (:id %)})
                    (k/update)))
          (doall))))
-
-(defn init!
-  "Initialize fingerprints in db for the specific entity"
-  ([entity]
-   (init! entity {}))
-  ([entity params]
-   (let [entities (k/select entity (k/where params))]
-     (->> entities
-          (map :id)
-          (swap! expired-ids assoc (:name entity)))
-     (->> entities
-          (map (juxt :fingerprint :id))
-          (into {})
-          (swap! cache assoc (:name entity))))))
