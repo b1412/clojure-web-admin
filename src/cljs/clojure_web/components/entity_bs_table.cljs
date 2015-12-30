@@ -229,7 +229,7 @@
           :entity entity
           :metadatas metadatas]])
 
-(defn entity-bs-table [& {:keys [entity btns]}]
+(defn entity-bs-table [& {:keys [entity btns url]}]
   (let [permissions (subscribe [:permissions])
         entity-metadata  (make-kw entity "-metadata")
         get-entity-metadata (make-kw "get-" entity "-metadata")
@@ -262,7 +262,7 @@
     (fn []
       (when @show?
         [bs-table
-         :data-url (str  "/" (plural entity) "/")
+         :data-url (or url (str  "/" (plural entity)))
          :metadata @metadatas
          :entity entity
          :search-box [search-box
@@ -278,9 +278,10 @@
                                   (vec))]
          metadatas]))))
 
-(defn create-bs-table [& {:keys [entity btns]}]
+(defn create-bs-table [& {:keys [entity btns url]}]
   (fn[]
     [entity-bs-table
      :entity entity
+     :url url
      :btns btns]))
 

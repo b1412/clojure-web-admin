@@ -124,39 +124,19 @@
         [Button {} "Cancel"]]])))
 
 
-(defn details [& {:keys [form]}]
-  [:div form
-   [Tabs {:default-active-key 1}
-    [Tab {:title "Detail Table" :event-key 1}
-     [create-bs-table
-      :entity
-      "computer"]]
-    [Tab {:title "Detail Table2" :event-key 2}
-     [create-bs-table
-      :entity
-      "brand"]]]])
-
-
-(defn master-detail [& {:keys [entity metadatas]}]
-  (let [form-data (atom {})]
-    [select-to-show
-     :title (str "Edit " (titleize entity))
-     :trigger [Button {:bs-style "primary"}
-               [Glyphicon {:glyph "edit"}] "Edit"]
-     :select-fn (fn []
-                  (->>
-                   (call-method entity "getSelections")
-                   (first)
-                   (js->clj)
-                   (map (fn [[k v]] [(keyword k) v]))
-                   (into {})))
-     :load-row-fn (fn [body row]
+(defn detail-views [& {:keys [master details]}]
+  [:div
+   master
+   [Tabs
+    (for [detail details]
+      [Tab {:title (str "Detail Table " detail) :event-key detail}
+       [create-bs-table
+        :entity
+        detail]])]])
                     (merge body :form-data row))
 
-     :body [details
-            :entity
-            entity
-            :form
+     :body [detail-views
+            :master
             [form
              :submit-fn (fn [data]
                           (go (let [url (str "/" (plural entity) "/" (:id @data))
@@ -173,7 +153,14 @@
                                 (reset! data {}))))
              :metadata  metadatas
              :form-data form-data
-             :entity    entity]]]))
+             :entity    entity]
+            :details
+            details]
+     :footer [[Button {:bs-style "primary"
+                       :on-click (fn []
+                                   (prn form-data))}
+               "Save"]
+              [Button {} "Cancel"]]]))
 
 
 
@@ -183,4 +170,5 @@
                  :btns {"get-role-resources"
                         [assign-resources]
                         :anon
-                        [master-detail]}))
+                        [master-detail
+                         :details ["computer" "brand"]]}))

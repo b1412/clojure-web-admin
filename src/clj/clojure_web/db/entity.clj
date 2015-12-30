@@ -26,7 +26,7 @@
             e)) %2))))
 
 (def mysql-db {:subprotocol "mysql"
-               :subname "//127.0.0.1:3306/clojure_web"
+               :subname "//127.0.0.1:3306/clojure_web?useInformationSchema=true"
                :user "root"
                :driver-class "com.mysql.jdbc.Driver"
                :password "root"
@@ -112,6 +112,7 @@
       (jdbc/metadata-result (.getPrimaryKeys md nil nil table))))))
 
 
+
 (def table->entity (atom {}))
 
 (defmacro defent [table & body]
@@ -174,7 +175,7 @@
 
 (defn get-all-columns [table]
   (->> (jdbc/with-db-metadata [md mysql-db]
-         (jdbc/metadata-result (.getColumns md nil nil nil nil)))
+         (jdbc/metadata-result (.getColumns md nil nil "%" nil)))
        (filter #(= table (:table_name %)))
        (map (comp #(update % :type-name (comp keyword str/lower-case))
                   #(update % :column-name (comp  keyword kit/underscore->dash))
