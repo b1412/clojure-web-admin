@@ -124,43 +124,10 @@
         [Button {} "Cancel"]]])))
 
 
-(defn detail-views [& {:keys [master details]}]
-  [:div
-   master
-   [Tabs
-    (for [detail details]
-      [Tab {:title (str "Detail Table " detail) :event-key detail}
-       [create-bs-table
-        :entity
-        detail]])]])
-                    (merge body :form-data row))
 
-     :body [detail-views
-            :master
-            [form
-             :submit-fn (fn [data]
-                          (go (let [url (str "/" (plural entity) "/" (:id @data))
-                                    res (<! (http/put
-                                             url
-                                             {:form-params
-                                              (->> (dissoc @data :id :errors)
-                                                   (filter (fn [[k v]] (not-empty (str v))))
-                                                   (into {}))}))]
-                                (if (:success res)
-                                  (dialog :message "Updated successfully")
-                                  (dialog :message (:body res) :type (aget js/BootstrapDialog "TYPE_DANGER")))
-                                (call-method entity "refresh")
-                                (reset! data {}))))
-             :metadata  metadatas
-             :form-data form-data
-             :entity    entity]
-            :details
-            details]
-     :footer [[Button {:bs-style "primary"
-                       :on-click (fn []
-                                   (prn form-data))}
-               "Save"]
-              [Button {} "Cancel"]]]))
+
+
+
 
 
 
@@ -168,7 +135,4 @@
 (def role-panel (create-bs-table
                  :entity "role"
                  :btns {"get-role-resources"
-                        [assign-resources]
-                        :anon
-                        [master-detail
-                         :details ["computer" "brand"]]}))
+                        [assign-resources]}))
