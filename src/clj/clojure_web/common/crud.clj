@@ -213,7 +213,6 @@
 
 (defn create-entity [entity params]
   (log/debug  "create " (:name entity) "  " params)
-
   (let [metadatas (e/get-all-columns-with-comment (:name entity))
         validators (get-validators metadatas)
         result (apply (partial b/validate params) validators)
@@ -234,7 +233,7 @@
                       :updated-at (current-time)
                       :version 1
                       :deleted 0}))
-        save (fn[params](-> (k/insert* entity)
+        create (fn[params](-> (k/insert* entity)
                      (k/values params)
                      (k/insert)))]
 
@@ -245,8 +244,8 @@
                                (map (fn [[_ v]] (first v)))
                                (str/join ". "))}))
     (if (contains-column? entity :fingerprint)
-      (fingerprint/create entity params save)
-      (save params))))
+      (fingerprint/create entity params create)
+      (create params))))
 
 (defn get-entity [entity id params]
   (log/debug "get" (:name entity) id)

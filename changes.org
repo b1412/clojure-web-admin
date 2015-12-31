@@ -1,0 +1,13 @@
+* Changes to Clojure in Version 0.1.0
+
+**  New Features
+git
+** Support generic columns - create_at update_at deleted creator_id.
+** File upload & download.
+** New column-type -- lookup.
+** Pseudo delete.
+** Notification after operation. 
+** Value-convertor for httprequest (value-in-adapter).
+** Incremental updates.
+** Quartz schedule task to clean unreferenced upload file.
+** Korma supporting lisp-style , avoiding any underscore.
