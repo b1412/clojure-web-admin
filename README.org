@@ -50,20 +50,15 @@ Let`s get start!
   #+END_SRC
    
 + Start project
- 
-    start font-end
 
-    #+BEGIN_SRC clojure
-      lein figwheel
-    #+END_SRC
+Open a terminal and type lein repl to start a Clojure REPL (interactive prompt).
 
-    start back-end
+In the REPL, type
 
-    #+BEGIN_SRC clojure
-      lein run
-    #+END_SRC
-  
-  NOTE:  Use REPL to get better development experience.
+#+BEGIN_SRC clojure
+  (start-server)
+  (browser-repl)
+#+END_SRC
 
 + Visit http://localhost:3000 and log in as admin 
    

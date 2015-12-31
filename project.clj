@@ -1,5 +1,5 @@
 (defproject clojure-web "0.1.0-SNAPSHOT"
- 
+  
   :description "A metadata-driven clojure web admin app"
   :url "https://github.com/b1412/clojure-web-admin"
   :dependencies [[org.clojure/clojure "1.7.0"]
@@ -89,46 +89,49 @@
       :externs ["react/externs/react.js"]
       :pretty-print true}}}}
   :global-vars {*warn-on-reflection* false}
-  :profiles
-  {:uberjar {:omit-source true
-             :env {:production true}
-              :hooks [leiningen.cljsbuild]
-              :cljsbuild
-              {:jar true
-               :builds
-               {:app
-                {:source-paths ["env/prod/cljs"]
-                 :compiler {:optimizations :advanced :pretty-print false}}}} 
-             
-             :aot :all}
-   :dev           [:project/dev :profiles/dev]
-   :test          [:project/test :profiles/test]
-   :project/dev  {:dependencies [[ring/ring-mock "0.3.0"]
-                                 [ring/ring-devel "1.4.0"]
-                                 [pjstadig/humane-test-output "0.7.0"]
-                                 [lein-figwheel "0.4.1"]
-                                 [midje "1.6.3"]]
-                  :plugins [[lein-figwheel "0.4.1"]]
-                  :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
-                  :garden {:builds [{:id "screen"
-                                     :source-paths ["src/clj"]
-                                     :stylesheet clojure-web.css/customize
-                                     :compiler {:output-to "resources/public/assets/css/customize.css.new"
-                                                :pretty-print? true}}]}
+  :profiles {:uberjar {:omit-source true
+                       :env {:production true}
+                       :hooks [leiningen.cljsbuild]
+                       :cljsbuild
+                       {:jar true
+                        :builds
+                        {:app
+                         {:source-paths ["env/prod/cljs"]
+                          :compiler {:optimizations :advanced :pretty-print false}}}} 
+                       
+                       :aot :all}
+             :dev           [:project/dev :profiles/dev]
+             :test          [:project/test :profiles/test]
+             :project/dev  {:dependencies [[ring/ring-mock "0.3.0"]
+                                           [ring/ring-devel "1.4.0"]
+                                           [pjstadig/humane-test-output "0.7.0"]
+                                           [midje "1.6.3"]
+                                           [figwheel "0.2.5"]
+                                           [figwheel-sidecar "0.2.5"]
+                                           [com.cemerick/piggieback "0.1.5"]
+                                           [weasel "0.6.0"]]
+                            :repl-options {:init-ns clojure-web.core
+                                           :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+                            :plugins [[lein-figwheel "0.4.1"]]
+                            :cljsbuild {:builds {:app {:source-paths ["env/dev/cljs"] :compiler {:source-map true}}}} 
+                            :garden {:builds [{:id "screen"
+                                               :source-paths ["src/clj"]
+                                               :stylesheet clojure-web.css/customize
+                                               :compiler {:output-to "resources/public/assets/css/customize.css.new"
+                                                          :pretty-print? true}}]}
 
-                  :figwheel
-                  {:http-server-root "public"
-                   :server-port 3449
-                   :nrepl-port 7002
-                   :css-dirs ["resources/public/css"]
-                   :ring-handler clojure-web.handler/app}
-                  
-                  :repl-options {:init-ns clojure-web.core}
-                  :injections [(require 'pjstadig.humane-test-output)
-                               (pjstadig.humane-test-output/activate!)]
-                  :env {:dev        true
-                        :port       3000
-                        :nrepl-port 7000}}
-   :project/test {:env {:test       true
-                        :port       3001
-                        :nrepl-port 7001}}})
+                            :figwheel
+                            {:http-server-root "public"
+                             :server-port 3449
+                             :nrepl-port 7002
+                             :css-dirs ["resources/public/css"]
+                             :ring-handler clojure-web.handler/app}
+                            
+                            :injections [(require 'pjstadig.humane-test-output)
+                                         (pjstadig.humane-test-output/activate!)]
+                            :env {:dev        true
+                                  :port       3000
+                                  :nrepl-port 7000}}
+             :project/test {:env {:test       true
+                                  :port       3001
+                                  :nrepl-port 7001}}})

@@ -1,4 +1,4 @@
-* Changes to Clojure in Version 0.1.0
+* Changes to Clojure Web Admin in Version 0.1.0
 
 *  New Features
 
@@ -9,5 +9,3 @@
 + Notification after operation. 
 + Value-convertor for httprequest (value-in-adapter).
 + Incremental updates.
-+ Quartz schedule task to clean unreferenced upload file.
-+ Korma supporting lisp-style , avoiding any underscore.
