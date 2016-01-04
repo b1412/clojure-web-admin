@@ -17,9 +17,11 @@
              [webjars :refer [wrap-webjars]]]
             [ring.middleware.session.memory :refer [memory-store]]
             [taoensso.timbre :as log]
+
             [ring.util.response :refer [redirect]]
             [slingshot.slingshot :refer [throw+]])
   (:import javax.servlet.ServletContext))
+
 
 (defn wrap-context [handler]
   (fn [request]

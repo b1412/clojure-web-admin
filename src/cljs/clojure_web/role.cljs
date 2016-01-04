@@ -1,6 +1,7 @@
 (ns clojure-web.role
   (:require-macros [cljs.core.async.macros :refer [go]]
-                   [secretary.core         :refer [defroute]])
+                   [secretary.core         :refer [defroute]]
+                   [taoensso.tower  :as tower-macros])
   (:require  [reagent.core :as reagent]
              [re-frame.core :refer [dispatch subscribe]]
              [clojure-web.user :refer [user-panel]]
@@ -11,6 +12,7 @@
              [clojure-web.components.react-bootstrap :refer [Button ButtonToolbar
                                                              Glyphicon Table
                                                              Tabs Tab]]
+             [taoensso.tower :as tower ]
              [cljs-http.client :as http]
              [inflections.core :refer  [plural titleize]]
              [clojure-web.components.common :refer [show-on-click show-when select-to-show
@@ -75,6 +77,53 @@
            ]))})
      resources)))
 
+(def my-tconfig
+  {:dictionary
+   {:en   {:create "Create"
+           :delete "Delete"
+           :edit "Edit"
+           :metadata "Metadata"
+           :new "New"
+           :charts "Charts"
+           :import "Import"
+           :export "Export"}
+    :zh   {:create "创建"
+           :delete "删除"
+           :edit "编辑"
+           :metadata "元数据"
+           :new "新增"
+           :charts "报表"
+           :import "导入"
+           :export "导出"}}
+   :fallback-locale :en})
+
+(def tconfig
+  {:fallback-locale :en
+   ;; Inlined (macro) dict => this ns needs rebuild for dict changes to reflect.
+   ;; (dictionary .clj file can be placed in project's `/resources` dir):
+   :compiled-dictionary (tower-macros/dict-compile*
+  {:en   {:create "Create"
+          :delete "Delete"
+          :edit "Edit"
+          :metadata "Metadata"
+          :new "New"
+          :charts "Charts"
+          :import "Import"
+          :export "Export"}
+   :zh   {:create "创建"
+          :delete "删除"
+          :edit "编辑"
+          :metadata "元数据"
+          :new "新增"
+          :charts "报表"
+          :import "导入"
+          :export "导出"}})})
+
+(def t (tower/make-t tconfig)) ; Create translation fn
+
+
+
+
 (defn assign-resources []
   (let [table-data (atom {})
         submit-fn (fn [data]
@@ -88,7 +137,7 @@
     (fn []
       [select-to-show
        :trigger [Button {:bs-style "info"}
-                 [Glyphicon {:glyph "user"}] "Assign"]
+                 [Glyphicon {:glyph "user"}] (t :zh :create)]
        :event :role-ress
        :select-fn (fn []
                     (->>

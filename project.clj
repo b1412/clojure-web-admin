@@ -18,8 +18,8 @@
                  ;;log
                  [com.taoensso/timbre "4.1.1"]
                  ;;I18n&L10n
-                 [com.taoensso/tower "3.0.2"]
-                 
+                 [com.taoensso/tower "3.1.0-beta4"]
+
                  ;;schedual jobs
                  [clojurewerkz/quartzite "2.0.0"]
 

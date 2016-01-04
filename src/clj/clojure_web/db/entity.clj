@@ -9,7 +9,8 @@
              [core :as k]
              [db :refer [defdb mysql]]]
             [superstring.core :as str]
-            [taoensso.timbre :as log])
+            [taoensso.timbre :as log]
+            [taoensso.tower :as tower :refer (with-tscope)])
   (:refer-clojure :exclude [group])
   (:import [com.alibaba.druid.filter Filter]
            [com.alibaba.druid.pool DruidDataSource]))
@@ -148,7 +149,7 @@
   (k/belongs-to role)
   (k/belongs-to organization))
 
-(defent dictionary)
+(defent enum)
 
 (defent upload)
 
@@ -212,7 +213,7 @@
                          (let [col-name (:type-name m)
                                enum-group (:enum-group m)]
                            (if (= "enum" col-name)
-                             (-> (k/select* dictionary)
+                             (-> (k/select* enum)
                                  (k/where {:group enum-group})
                                  (k/select)
                                  (#(map (juxt :value :label) %))
@@ -298,10 +299,39 @@
                    (k/join env [t a] (= pk fk))))
                env)))
 
+
+(def my-tconfig
+  {:dictionary
+   {:en   {:create "Create"
+           :delete "Delete"
+           :edit "Edit"
+           :metadata "Metadata"
+           :new "New"
+           :charts "Charts"
+           :import "Import"
+           :export "Export"}
+    :zh   {:create "创建"
+           :delete "删除"
+           :edit "编辑"
+           :metadata "元数据"
+           :new "新增"
+           :charts "报表"
+           :import "导入"
+           :export "导出"}}
+   :fallback-locale :en})
+
+(def t (tower/make-t my-tconfig))
+
+(defn translate [k locale tconfig]
+  (let [v (tconfig locale (keyword ((fnil str/lower-case "") k)))]
+    (if (empty? v) k v)))
+
+
 (defn get-permissions [user]
-  (-> (k/exec-raw ["select res.id, `key`, label, uri, method, scope, `type`,  parent_id
+  (->> (k/exec-raw ["select res.id, `key`, label, uri, method, scope, `type`,  parent_id
                       from resource res
                       join role_resource rel
                       on (res.id = rel.resource_id)
                       where rel.role_id = ?" [(:role.id user)]] :results)
+      (map (fn [m] (update m :label translate :zh t)))
       (set)))
