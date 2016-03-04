@@ -87,6 +87,7 @@
                       (:organization-id curr-user)
                       (:user.organization-id ent))
                    (throw+ {:type ex/unauthorized-operation :message "unauthorized operation"}))
+        "orgs"   true
         "user"   (if (not= (:id curr-user) (:creator-id ent))
                    (throw+ {:type ex/unauthorized-operation :message "unauthorized operation"}))
         (throw+ {:type ex/unknown :message (str "unknown scope: " scope )})))))
@@ -94,10 +95,13 @@
 (defn data-level-cond [scope curr-user]
   (case scope
     "system" {}
-    "orgs" {}
+    "orgs" (let [org-id (:organization.id curr-user)
+                 sub-ids (e/sub-ids e/organization org-id)]
+             {:user.organization-id (list* (conj sub-ids org-id))
+              :user.organization-id-op "in"})
     "org"  {:user.organization-id (:organization.id curr-user)}
     "user" {:creator-id (:id curr-user)}
-    (throw+ {:type ex/unknown :message (str "unknown scope: " scope )})))
+    (throw+ {:type ex/unknown :message (str "unknown scope: " scope)})))
 
 (defn data-level-read [scope current-user params]
   (if scope

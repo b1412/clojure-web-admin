@@ -77,30 +77,9 @@
            ]))})
      resources)))
 
-(def my-tconfig
-  {:dictionary
-   {:en   {:create "Create"
-           :delete "Delete"
-           :edit "Edit"
-           :metadata "Metadata"
-           :new "New"
-           :charts "Charts"
-           :import "Import"
-           :export "Export"}
-    :zh   {:create "创建"
-           :delete "删除"
-           :edit "编辑"
-           :metadata "元数据"
-           :new "新增"
-           :charts "报表"
-           :import "导入"
-           :export "导出"}}
-   :fallback-locale :en})
 
 (def tconfig
   {:fallback-locale :en
-   ;; Inlined (macro) dict => this ns needs rebuild for dict changes to reflect.
-   ;; (dictionary .clj file can be placed in project's `/resources` dir):
    :compiled-dictionary (tower-macros/dict-compile*
   {:en   {:create "Create"
           :delete "Delete"
@@ -119,7 +98,7 @@
           :import "导入"
           :export "导出"}})})
 
-(def t (tower/make-t tconfig)) ; Create translation fn
+(def t (tower/make-t tconfig))
 
 
 
@@ -137,7 +116,7 @@
     (fn []
       [select-to-show
        :trigger [Button {:bs-style "info"}
-                 [Glyphicon {:glyph "user"}] (t :zh :create)]
+                 [Glyphicon {:glyph "user"}] "Assign"]
        :event :role-ress
        :select-fn (fn []
                     (->>

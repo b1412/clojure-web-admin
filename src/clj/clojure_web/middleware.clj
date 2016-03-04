@@ -76,7 +76,7 @@
          (merge {:login-uri "/login"
                  :logout-uri "/logout"
                  :index-uri "/"
-                 :anon "(/uploads|/permissions|/api-ui)"
+                 :anon "(/uploads.*|/permissions|/api-ui)"
                  :default-landing-uri "/login-page"
                  :unauthorized-handler #(throw+ ex/unauthorized-operation)}
                 options)]

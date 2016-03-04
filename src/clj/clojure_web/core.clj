@@ -19,17 +19,22 @@
       (piggieback/cljs-repl :repl-env repl-env))))
 
 (comment (defn start-figwheel []
-    (let [server (fig/start-server { :css-dirs ["resources/public/css"] })
-          config {:builds [{:id "dev"
-                            :source-paths ["src/cljs" "env/dev/cljs"]
-                            :compiler {:output-to            "resources/public/js/app.js"
-                                       :output-dir           "resources/public/js/out"
-                                       :source-map           true
-                                       :optimizations        :none
-                                       :source-map-timestamp true
-                                       :preamble             ["react/react.min.js"]}}]
-                  :figwheel-server server}]
-      (fig-auto/autobuild* config))))
+           (let [server (fig/start-server
+                         {:http-server-root "public"
+                          :server-port 3449
+                          :nrepl-port 7002
+                          :css-dirs ["resources/public/css"]
+                          :ring-handler clojure-web.handler/app})
+                 config {:builds [{:id "dev"
+                                   :source-paths ["src/cljs" "env/dev/cljs"]
+                                   :compiler {:output-to            "resources/public/js/app.js"
+                                              :output-dir           "resources/public/js/out"
+                                              :source-map           true
+                                              :optimizations        :none
+                                              :source-map-timestamp true
+                                              :preamble             ["react/react.min.js"]}}]
+                         :figwheel-server server}]
+             (fig-auto/autobuild* config))))
 
 
 (defonce server (atom nil))

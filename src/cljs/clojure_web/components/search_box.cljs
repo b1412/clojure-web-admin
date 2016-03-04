@@ -16,6 +16,7 @@
 
 
 (defn search-box
+  "Render the first 6 searchable columns"
   [& {:keys [entity metadatas params]}]
   (let [params (atom {})
         on-click (fn [event]

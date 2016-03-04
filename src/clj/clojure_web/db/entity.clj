@@ -162,8 +162,16 @@
 
 
 
-(defn get-children [root coll]
-  (filter #(= (:parent_id %) (:id root)) coll))
+(defn get-children [entity id]
+  (-> (k/select* entity)
+      (k/where {:parent-id id})
+      (k/select)))
+
+
+(defn sub-ids [entity id]
+  (->> (get-children entity id)
+       (map :id)))
+
 
 (defn menu-tree [root coll]
   (let [children (get-children root coll)]
