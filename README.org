@@ -9,7 +9,7 @@ The core features are as follows:
  + CRUD with data-level permissions based on [[https://github.com/korma/Korma][korma]] 
  + Menu tree&toolbar with button-level permissions based on [[https://github.com/reagent-project/reagent][reagent]] & [[https://github.com/Day8/re-frame][re-frame]]
  + High-level abstract field types based on [[https://github.com/reagent-project/reagent-forms][reagent-forms]] (e.g. image, attachment, enum, select, etc.) 
- + Font-end&back-end validation based on [[https://github.com/leonardoborges/bouncer][bouncer]]
+ + Front-end&back-end validation based on [[https://github.com/leonardoborges/bouncer][bouncer]]
 
 
 Other features:
@@ -51,14 +51,17 @@ Let`s get start!
    
 + Start project
 
-Open a terminal and type lein repl to start a Clojure REPL (interactive prompt).
+  start front-end
 
-In the REPL, type
+    #+BEGIN_SRC clojure
+      lein figwheel
+    #+END_SRC
 
-#+BEGIN_SRC clojure
-  (start-server)
-  (browser-repl)
-#+END_SRC
+  start back-end
+
+    #+BEGIN_SRC clojure
+      lein run
+    #+END_SRC
 
 + Visit http://localhost:3000 and log in as admin 
    
@@ -74,6 +77,6 @@ In the REPL, type
 
 * License
 
-Copyright © 2015 [[http://blog.kidzhou.me][Leon Zhou]]
+Copyright © 2016 [[http://blog.kidzhou.me][Leon Zhou]]
 
 Distributed under the Eclipse Public License, the same as Clojure.
